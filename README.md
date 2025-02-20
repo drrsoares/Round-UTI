@@ -1,622 +1,588 @@
-# Round-UTI
-Formulario para Round Diario na UTI
-<html lang="pt-BR">
+<!DOCTYPE html>
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAST HUG - Sistema Integrado de Avaliação</title>
-
+    <title>Avaliação Inicial UTI</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
+            background-color: #f3f4f6;
             padding: 20px;
-            background-color: #f5f5f5;
-            line-height: 1.6;
         }
 
         .card {
             background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto 20px auto;
+        }
+
+        h1 {
+            color: #1e40af;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
         }
 
         .form-group {
-            margin-bottom: 15px;
-            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: #1e40af;
+            font-size: 18px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #e2e8f0;
         }
 
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
-            color: #333333;
+            color: #374151;
         }
 
-        input, 
-        select, 
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        select,
         textarea {
             width: 100%;
             padding: 8px;
-            border: 1px solid #dddddd;
+            border: 1px solid #d1d5db;
             border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 14px;
+            font-size: 16px;
         }
 
-        textarea {
-            resize: vertical;
-            min-height: 60px;
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
         }
 
         .checkbox-group {
-            margin: 8px 0;
-            padding: 5px 0;
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
         }
 
-        .checkbox-group input[type="radio"],
-        .checkbox-group input[type="checkbox"] {
-            width: auto;
-            margin-right: 8px;
-            cursor: pointer;
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .checkbox-group label {
-            display: inline;
-            font-weight: normal;
-            cursor: pointer;
+        .info-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 5px;
+        }
+
+        .botoes {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
         }
 
         .botao {
-            background-color: #4C51BF;
-            color: white;
-            border: none;
             padding: 10px 20px;
+            border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
-            margin-right: 10px;
-            transition: background-color 0.3s ease;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .botao-primario {
+            background-color: #1e40af;
+            color: white;
+        }
+
+        .botao-secundario {
+            background-color: #4b5563;
+            color: white;
         }
 
         .botao:hover {
-            background-color: #434190;
+            opacity: 0.9;
         }
 
-        .tabela-avaliacoes {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: white;
-        }
-
-        .tabela-avaliacoes th, 
-        .tabela-avaliacoes td {
-            padding: 12px;
-            border: 1px solid #dddddd;
-            text-align: left;
-        }
-
-        .tabela-avaliacoes th {
-            background-color: #f8f8f8;
-            font-weight: bold;
-        }
-
-        .status {
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        .status.erro {
-            background-color: #FEE2E2;
-            color: #991B1B;
-            border: 1px solid #991B1B;
-        }
-
-        .status.sucesso {
-            background-color: #DCFCE7;
-            color: #166534;
-            border: 1px solid #166534;
-        }
-
-        select[multiple] {
-            height: auto;
-            min-height: 100px;
-        }
-
-        h1, h2 {
-            color: #1a202c;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            font-size: 24px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 10px;
-        }
-
-        h2 {
-            font-size: 20px;
-            margin-top: 30px;
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>FAST HUG - Avaliação Diária</h1>
+        <h1>Avaliação Inicial UTI</h1>
         
-        <form id="fastHugForm">
+        <form id="avaliacaoForm">
+            <!-- Identificação -->
             <div class="form-group">
-                <label>Data da Avaliação:</label>
-                <input type="date" id="data" required>
-            </div>
-
-            <div class="form-group">
-                <label>Nome do Paciente:</label>
-                <input type="text" id="paciente" required>
-            </div>
-
-            <div class="form-group">
-                <label>Leito:</label>
-                <input type="text" id="leito" required>
-            </div>
-
-            <div class="form-group">
-                <label>Data de Internação na UTI:</label>
-                <input type="date" id="data_internacao_uti" onchange="calcularTempoInternacao()" required>
-                <div id="tempo_internacao" style="margin-top: 8px; color: #4a5568; font-weight: bold;"></div>
-            </div>
-
-            <div class="form-group">
-                <label>Paciente pode ter alta?</label>
-                <div class="checkbox-group">
-                    <input type="radio" id="alta_sim" name="alta" value="sim" onchange="toggleAlta()">
-                    <label for="alta_sim">Sim</label>
-                    <input type="radio" id="alta_nao" name="alta" value="nao" onchange="toggleAlta()">
-                    <label for="alta_nao">Não</label>
-                </div>
-                <div id="alta_info" style="display:none; margin-top: 10px;">
-                    <textarea 
-                        id="observacoes_alta" 
-                        placeholder="Observações sobre a alta do paciente"
-                        rows="2">
-                    </textarea>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Intubado(a)?</label>
-                <div class="checkbox-group">
-                    <input type="radio" id="intubado_sim" name="intubado" value="sim" onchange="toggleIntubacao()">
-                    <label for="intubado_sim">Sim</label>
-                    <input type="radio" id="intubado_nao" name="intubado" value="nao" onchange="toggleIntubacao()">
-                    <label for="intubado_nao">Não</label>
-                </div>
-            </div>
-
-            <div id="intubacao_info" style="display:none">
-                <div class="form-group">
-                    <label>Data da Intubação:</label>
-                    <input type="date" id="data_intubacao" onchange="calcularTempoIntubacao()">
-                    <div id="tempo_intubacao" style="margin-top: 5px; color: #4a5568; font-weight: bold;"></div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Uso de Cateter Venoso Central:</label>
-                <div class="checkbox-group">
-                    <input type="radio" id="cateter_sim" name="cateter" value="sim" onchange="toggleCateter()">
-                    <label for="cateter_sim">Sim</label>
-                    <input type="radio" id="cateter_nao" name="cateter" value="nao" onchange="toggleCateter()">
-                    <label for="cateter_nao">Não</label>
-                </div>
-            </div>
-
-            <div id="cateter_info" style="display:none">
-                <div class="form-group">
-                    <label>Localização do Cateter:</label>
-                    <select id="localizacao_cateter" class="form-select">
-                        <option value="">Selecione a localização</option>
-                        <option value="jugular">Jugular</option>
-                        <option value="subclavia">Subclávia</option>
-                        <option value="femoral">Femoral</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Data de Inserção do Cateter:</label>
-                    <input type="date" id="data_cateter" onchange="calcularTempoCateter()">
-                    <div id="tempo_cateter" style="margin-top: 8px; color: #4a5568; font-weight: bold;"></div>
-                </div>
-
-                <div class="form-group">
-                    <label>Pode ser retirado?</label>
-                    <div class="checkbox-group">
-                        <input type="radio" id="retirar_sim" name="retirar_cateter" value="sim">
-                        <label for="retirar_sim">Sim</label>
-                        <input type="radio" id="retirar_nao" name="retirar_cateter" value="nao">
-                        <label for="retirar_nao">Não</label>
-                    </div>
-                </div>
-            </div>
-            function toggleVentilacao() {
-    const vmInfo = document.getElementById('vm_info');
-    const vniInfo = document.getElementById('vni_info');
-    const cnInfo = document.getElementById('cn_info');
-    
-    // Esconde todos primeiro
-    vmInfo.style.display = 'none';
-    vniInfo.style.display = 'none';
-    cnInfo.style.display = 'none';
-    
-    // Mostra apenas o selecionado
-    if (document.getElementById('ventilacao_vm').checked) {
-        vmInfo.style.display = 'block';
-    } else if (document.getElementById('ventilacao_vni').checked) {
-        vniInfo.style.display = 'block';
-    } else if (document.getElementById('ventilacao_cn').checked) {
-        cnInfo.style.display = 'block';
-    }
-}
-
-// Adicionar ao evento de submit do formulário:
-document.getElementById('fastHugForm').addEventListener('submit', function(evento) {
-    // ... resto do código ...
-    
-    const novaAvaliacao = {
-        // ... outros campos ...
-        tipo_ventilacao: document.querySelector('input[name="tipo_ventilacao"]:checked')?.value,
-        parametros_vm: document.getElementById('ventilacao_vm').checked ? {
-            modo: document.getElementById('modo_ventilatorio').value,
-            fio2: document.getElementById('fio2').value,
-            peep: document.getElementById('peep').value,
-            volume_corrente: document.getElementById('volume_corrente').value,
-            fr_total: document.getElementById('fr_total').value,
-            pressao_pico: document.getElementById('pressao_pico').value,
-            desmame: document.querySelector('input[name="desmame"]:checked')?.value
-        } : null,
-        parametros_vni: document.getElementById('ventilacao_vni').checked ? {
-            ipap: document.getElementById('ipap').value,
-            epap: document.getElementById('epap').value,
-            fio2: document.getElementById('fio2_vni').value
-        } : null,
-        fluxo_o2: document.getElementById('ventilacao_cn').checked ? 
-            document.getElementById('fluxo_o2').value : null
-    };
-                <!-- Seção de Monitorização -->
-            <div class="form-group">
-                <label>Monitorização:</label>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 10px;">
-                    <!-- Sinais Vitais -->
-                    <div class="card" style="padding: 15px; margin: 0;">
-                        <h3 style="margin-top: 0; color: #4a5568; font-size: 16px;">Sinais Vitais</h3>
-                        <div style="display: grid; gap: 10px;">
-                            <div>
-                                <label>PA (mmHg):</label>
-                                <div style="display: flex; gap: 5px;">
-                                    <input type="number" id="pa_sistolica" placeholder="PAS" min="0" max="300" style="width: 80px;">
-                                    <span style="align-self: center;">/</span>
-                                    <input type="number" id="pa_diastolica" placeholder="PAD" min="0" max="300" style="width: 80px;">
-                                </div>
-                            </div>
-                            <div>
-                                <label>FC (bpm):</label>
-                                <input type="number" id="fc" min="0" max="300">
-                            </div>
-                            <div>
-                                <label>FR (irpm):</label>
-                                <input type="number" id="fr" min="0" max="100">
-                            </div>
-                            <div>
-                                <label>Temperatura (°C):</label>
-                                <input type="number" id="temperatura" min="30" max="45" step="0.1">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Oximetria e Gases -->
-                    <div class="card" style="padding: 15px; margin: 0;">
-                        <h3 style="margin-top: 0; color: #4a5568; font-size: 16px;">Oximetria e Gases</h3>
-                        <div style="display: grid; gap: 10px;">
-                            <div>
-                                <label>SpO2 (%):</label>
-                                <input type="number" id="spo2" min="0" max="100">
-                            </div>
-                            <div>
-                                <label>Lactato:</label>
-                                <input type="number" id="lactato" min="0" max="50" step="0.1">
-                            </div>
-                            <div>
-                                <label>pH:</label>
-                                <input type="number" id="ph" min="6.5" max="8.0" step="0.01">
-                            </div>
-                            <div>
-                                <label>HCO3:</label>
-                                <input type="number" id="hco3" min="0" max="50" step="0.1">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Neurológico -->
-                    <div class="card" style="padding: 15px; margin: 0;">
-                        <h3 style="margin-top: 0; color: #4a5568; font-size: 16px;">Avaliação Neurológica</h3>
-                        <div style="display: grid; gap: 10px;">
-                            <div>
-                                <label>Escala de Glasgow:</label>
-                                <input type="number" id="glasgow" min="3" max="15">
-                            </div>
-                            <div>
-                                <label>RASS:</label>
-                                <select id="rass">
-                                    <option value="">Selecione</option>
-                                    <option value="+4">+4 Combativo</option>
-                                    <option value="+3">+3 Muito agitado</option>
-                                    <option value="+2">+2 Agitado</option>
-                                    <option value="+1">+1 Inquieto</option>
-                                    <option value="0">0 Alerta/Calmo</option>
-                                    <option value="-1">-1 Sonolento</option>
-                                    <option value="-2">-2 Sedação leve</option>
-                                    <option value="-3">-3 Sedação moderada</option>
-                                    <option value="-4">-4 Sedação profunda</option>
-                                    <option value="-5">-5 Não desperta</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Pupilas:</label>
-                                <select id="pupilas">
-                                    <option value="">Selecione</option>
-                                    <option value="iso_foto">Isocóricas e fotorreagentes</option>
-                                    <option value="aniso_foto">Anisocóricas e fotorreagentes</option>
-                                    <option value="iso_nao_foto">Isocóricas e não fotorreagentes</option>
-                                    <option value="aniso_nao_foto">Anisocóricas e não fotorreagentes</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Hemodinâmica -->
-                    <div class="card" style="padding: 15px; margin: 0;">
-                        <h3 style="margin-top: 0; color: #4a5568; font-size: 16px;">Monitorização Hemodinâmica</h3>
-                        <div style="display: grid; gap: 10px;">
-                            <div>
-                                <label>PAM (mmHg):</label>
-                                <input type="number" id="pam" min="0" max="200">
-                            </div>
-                            <div>
-                                <label>PVC (mmHg):</label>
-                                <input type="number" id="pvc" min="0" max="50">
-                            </div>
-                            <div>
-                                <label>Débito Urinário (mL/h):</label>
-                                <input type="number" id="debito_urinario" min="0">
-                            </div>
-                            <div>
-                                <label>Balanço Hídrico (mL):</label>
-                                <input type="number" id="balanco_hidrico">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Drogas Vasoativas -->
-                <div class="card" style="padding: 15px; margin-top: 15px;">
-                    <h3 style="margin-top: 0; color: #4a5568; font-size: 16px;">Drogas Vasoativas</h3>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-                        <div>
-                            <label>Noradrenalina (mcg/kg/min):</label>
-                            <input type="number" id="noradrenalina" min="0" max="5" step="0.01">
-                        </div>
-                        <div>
-                            <label>Dobutamina (mcg/kg/min):</label>
-                            <input type="number" id="dobutamina" min="0" max="50" step="0.1">
-                        </div>
-                        <div>
-                            <label>Vasopressina (U/min):</label>
-                            <input type="number" id="vasopressina" min="0" max="0.1" step="0.01">
-                        </div>
-                    </div>
-                </div>
-            </div>
-                        <!-- Seção F - Feeding (Nutrição) -->
-            <div class="form-group">
-                <label>F - Alimentação:</label>
-                <div class="checkbox-group">
-                    <input type="radio" id="nutricao_enteral" name="tipo_nutricao" value="enteral" onchange="toggleNutricao()">
-                    <label for="nutricao_enteral">Nutrição Enteral</label>
-                    
-                    <input type="radio" id="nutricao_parenteral" name="tipo_nutricao" value="parenteral" onchange="toggleNutricao()">
-                    <label for="nutricao_parenteral">Nutrição Parenteral</label>
-                    
-                    <input type="radio" id="nutricao_vo" name="tipo_nutricao" value="vo" onchange="toggleNutricao()">
-                    <label for="nutricao_vo">Via Oral</label>
-                    
-                    <input type="radio" id="nutricao_jejum" name="tipo_nutricao" value="jejum" onchange="toggleNutricao()">
-                    <label for="nutricao_jejum">Jejum</label>
-                </div>
-
-                <div id="nutricao_info" style="display:none; margin-top: 10px;">
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                        <div>
-                            <label>Volume em 24h (mL):</label>
-                            <input type="number" id="volume_nutricao" min="0">
-                        </div>
-                        <div>
-                            <label>Velocidade de Infusão (mL/h):</label>
-                            <input type="number" id="velocidade_nutricao" min="0">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção A - Analgesia -->
-            <div class="form-group">
-                <label>A - Analgesia:</label>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                    <div class="card" style="padding: 15px; margin: 0;">
-                        <h3 style="margin-top: 0; color: #4a5568; font-size: 16px;">Medicações em Uso</h3>
-                        <div class="checkbox-group">
-                            <div>
-                                <input type="checkbox" id="analgesico_dipirona" name="analgesicos">
-                                <label for="analgesico_dipirona">Dipirona</label>
-                            </div>
-                            <div>
-                                <input type="checkbox" id="analgesico_tramadol" name="analgesicos">
-                                <label for="analgesico_tramadol">Tramadol</label>
-                            </div>
-                            <div>
-                                <input type="checkbox" id="analgesico_morfina" name="analgesicos">
-                                <label for="analgesico_morfina">Morfina</label>
-                            </div>
-                            <div>
-                                <input type="checkbox" id="analgesico_fentanil" name="analgesicos">
-                                <label for="analgesico_fentanil">Fentanil</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card" style="padding: 15px; margin: 0;">
-                        <h3 style="margin-top: 0; color: #4a5568; font-size: 16px;">Avaliação da Dor</h3>
-                        <div>
-                            <label>Escala de Dor (0-10):</label>
-                            <input type="number" id="escala_dor" min="0" max="10">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção S - Sedação -->
-            <div class="form-group">
-                <label>S - Sedação:</label>
-                <div class="checkbox-group">
+                <h2 class="section-title">Identificação do Paciente</h2>
+                <div class="grid-2">
                     <div>
-                        <input type="checkbox" id="sedacao_midazolam" name="sedativos">
-                        <label for="sedacao_midazolam">Midazolam</label>
-                        <input type="number" id="dose_midazolam" placeholder="mg/h" min="0" style="width: 80px; margin-left: 10px;">
+                        <label>Nome do Paciente:</label>
+                        <input type="text" id="nome" name="nome" required>
                     </div>
                     <div>
-                        <input type="checkbox" id="sedacao_fentanil" name="sedativos">
-                        <label for="sedacao_fentanil">Fentanil</label>
-                        <input type="number" id="dose_fentanil" placeholder="mcg/h" min="0" style="width: 80px; margin-left: 10px;">
+                        <label>Registro:</label>
+                        <input type="text" id="registro" name="registro" required>
+                    </div>
+                </div>
+                <div class="grid-3">
+                    <div>
+                        <label>Sexo:</label>
+                        <select id="sexo" name="sexo" required>
+                            <option value="">Selecione</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Feminino</option>
+                        </select>
                     </div>
                     <div>
-                        <input type="checkbox" id="sedacao_propofol" name="sedativos">
-                        <label for="sedacao_propofol">Propofol</label>
-                        <input type="number" id="dose_propofol" placeholder="mg/h" min="0" style="width: 80px; margin-left: 10px;">
+                        <label>Data de Internação:</label>
+                        <input type="date" id="data_internacao" name="data_internacao" onchange="calcularTempoInternacao()" required>
+                        <div id="tempo_internacao" class="info-box"></div>
                     </div>
                     <div>
-                        <input type="checkbox" id="sedacao_dexmedetomidina" name="sedativos">
-                        <label for="sedacao_dexmedetomidina">Dexmedetomidina</label>
-                        <input type="number" id="dose_dexmedetomidina" placeholder="mcg/kg/h" min="0" style="width: 80px; margin-left: 10px;">
+                        <label>Leito:</label>
+                        <input type="text" id="leito" name="leito" required>
                     </div>
                 </div>
             </div>
 
-            <!-- Seção T - Tromboprofilaxia -->
+            <!-- Alimentação -->
             <div class="form-group">
-                <label>T - Tromboprofilaxia:</label>
-                <div class="checkbox-group">
-                    <div style="margin-bottom: 8px;">
-                        <input type="checkbox" id="hbpm" name="tromboprofilaxia">
-                        <label for="hbpm">HBPM (Heparina de Baixo Peso Molecular)</label>
+                <h2 class="section-title">Alimentação</h2>
+                <div class="grid-2">
+                    <div>
+                        <label>Via de Alimentação:</label>
+                        <select id="via_alimentacao" name="via_alimentacao" onchange="toggleAlimentacao()">
+                            <option value="">Selecione</option>
+                            <option value="oral">Via Oral</option>
+                            <option value="sng">SNG</option>
+                            <option value="sne">SNE</option>
+                            <option value="gastrostomia">Gastrostomia</option>
+                            <option value="jejunostomia">Jejunostomia</option>
+                            <option value="npo">NPO</option>
+                        </select>
                     </div>
-                    <div style="margin-bottom: 8px;">
-                        <input type="checkbox" id="hnf" name="tromboprofilaxia">
-                        <label for="hnf">HNF (Heparina Não Fracionada)</label>
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <input type="checkbox" id="aco" name="tromboprofilaxia">
-                        <label for="aco">ACO (Anticoagulante Oral)</label>
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <input type="checkbox" id="meias" name="tromboprofilaxia">
-                        <label for="meias">Meias Elásticas</label>
+                    <div id="dieta_info" style="display: none;">
+                        <label>Tipo de Dieta:</label>
+                        <select id="tipo_dieta" name="tipo_dieta">
+                            <option value="">Selecione</option>
+                            <option value="padrao">Padrão</option>
+                            <option value="branda">Branda</option>
+                            <option value="pastosa">Pastosa</option>
+                            <option value="liquida">Líquida</option>
+                            <option value="enteral">Enteral</option>
+                        </select>
                     </div>
                 </div>
-                <textarea 
-                    id="tromboprofilaxia_obs" 
-                    placeholder="Observações sobre tromboprofilaxia: dosagem, contraindicações, etc."
-                    rows="3">
-                </textarea>
-            </div>
-
-            <!-- Seção H - Head of Bed Elevation -->
-            <div class="form-group">
-                <label>H - Cabeceira Elevada:</label>
-                <div class="checkbox-group">
-                    <input type="radio" id="cabeceira_30" name="cabeceira" value="30">
-                    <label for="cabeceira_30">30°</label>
-                    
-                    <input type="radio" id="cabeceira_45" name="cabeceira" value="45">
-                    <label for="cabeceira_45">45°</label>
-                    
-                    <input type="radio" id="cabeceira_0" name="cabeceira" value="0">
-                    <label for="cabeceira_0">0° (Contraindicado)</label>
+                <div id="volume_info" style="display: none; margin-top: 10px;">
+                    <label>Volume em 24h (mL):</label>
+                    <input type="number" id="volume_dieta" name="volume_dieta">
                 </div>
-                <textarea 
-                    id="cabeceira_obs" 
-                    placeholder="Observações sobre posicionamento do paciente"
-                    rows="2">
-                </textarea>
             </div>
 
-            <!-- Seção U - Úlcera de Estresse -->
+            <!-- Analgesia -->
             <div class="form-group">
-                <label>U - Profilaxia de Úlcera de Estresse:</label>
-                <div class="checkbox-group">
+                <h2 class="section-title">Analgesia</h2>
+                <div class="grid-2">
                     <div>
-                        <input type="checkbox" id="ulcera_omeprazol" name="protecao_gastrica">
-                        <label for="ulcera_omeprazol">Omeprazol</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" id="ulcera_ranitidina" name="protecao_gastrica">
-                        <label for="ulcera_ranitidina">Ranitidina</label>
+                        <label>Analgésicos em Uso:</label>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="dipirona" name="analgesicos" value="dipirona">
+                            <label for="dipirona">Dipirona</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="tramadol" name="analgesicos" value="tramadol">
+                            <label for="tramadol">Tramadol</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="morfina" name="analgesicos" value="morfina">
+                            <label for="morfina">Morfina</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="fentanil" name="analgesicos" value="fentanil">
+                            <label for="fentanil">Fentanil</label>
+                        </div>
                     </div>
                     <div>
-                        <input type="checkbox" id="ulcera_pantoprazol" name="protecao_gastrica">
-                        <label for="ulcera_pantoprazol">Pantoprazol</label>
+                        <label>Escala de Dor (0-10):</label>
+                        <input type="number" id="escala_dor" name="escala_dor" min="0" max="10">
                     </div>
                 </div>
             </div>
 
-            <!-- Seção G - Glicemia -->
+            <!-- Sedação -->
             <div class="form-group">
-                <label>G - Glicemia:</label>
-                <input 
-                    type="number" 
-                    id="glicemia" 
-                    placeholder="Valor da glicemia em mg/dL"
-                    min="0" 
-                    max="999">
-                
-                <div class="checkbox-group" style="margin-top: 10px;">
-                    <input type="radio" id="insulina_sim" name="recebeu_insulina" value="sim" onchange="toggleInsulinaQuantidade()">
-                    <label for="insulina_sim">Recebeu Insulina: Sim</label>
-                    
-                    <input type="radio" id="insulina_nao" name="recebeu_insulina" value="nao" onchange="toggleInsulinaQuantidade()">
-                    <label for="insulina_nao">Recebeu Insulina: Não</label>
-                </div>
-
-                <div id="insulina_info" style="display: none; margin-top: 10px;">
-                    <label>Quantidade de Insulina (UI):</label>
-                    <input 
-                        type="number" 
-                        id="quantidade_insulina" 
-                        placeholder="Unidades de Insulina"
-                        min="0" 
-                        step="1" 
-                        class="w-full p-2 border rounded">
+                <h2 class="section-title">Sedação</h2>
+                <div class="grid-2">
+                    <div>
+                        <label>Sedativos em Uso:</label>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="midazolam" name="sedativos" value="midazolam">
+                            <label for="midazolam">Midazolam</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="propofol" name="sedativos" value="propofol">
+                            <label for="propofol">Propofol</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="dexmedetomidina" name="sedativos" value="dexmedetomidina">
+                            <label for="dexmedetomidina">Dexmedetomidina</label>
+                        </div>
+                    </div>
+                    <div>
+                        <label>RASS:</label>
+                        <select id="rass" name="rass">
+                            <option value="">Selecione</option>
+                            <option value="+4">+4 Combativo</option>
+                            <option value="+3">+3 Muito agitado</option>
+                            <option value="+2">+2 Agitado</option>
+                            <option value="+1">+1 Inquieto</option>
+                            <option value="0">0 Alerta e calmo</option>
+                            <option value="-1">-1 Sonolento</option>
+                            <option value="-2">-2 Sedação leve</option>
+                            <option value="-3">-3 Sedação moderada</option>
+                            <option value="-4">-4 Sedação profunda</option>
+                            <option value="-5">-5 Não despertável</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <!-- Botão de Envio -->
-            <div class="form-group" style="margin-top: 20px;">
-                <button type="submit" class="botao">Salvar Avaliação</button>
+            <!-- Tromboprofilaxia -->
+            <div class="form-group">
+                <h2 class="section-title">Tromboprofilaxia</h2>
+                <div class="grid-2">
+                    <div>
+                        <label>Profilaxia em Uso:</label>
+                        <select id="tromboprofilaxia" name="tromboprofilaxia">
+                            <option value="">Selecione</option>
+                            <option value="heparina">Heparina não fracionada</option>
+                            <option value="enoxaparina">Enoxaparina</option>
+                            <option value="mecanica">Profilaxia mecânica</option>
+                            <option value="contraindicada">Contraindicada</option>
+                            <option value="nao">Não está em uso</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Observações:</label>
+                        <textarea id="obs_tromboprofilaxia" name="obs_tromboprofilaxia" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cabeceira e Conforto -->
+            <div class="form-group">
+                <h2 class="section-title">Cabeceira e Conforto</h2>
+                <div class="grid-2">
+                    <div>
+                        <label>Cabeceira (graus):</label>
+                        <input type="number" id="cabeceira" name="cabeceira" min="0" max="90">
+                    </div>
+                    <div>
+                        <label>Mudança de Decúbito:</label>
+                        <select id="mudanca_decubito" name="mudanca_decubito">
+                            <option value="">Selecione</option>
+                            <option value="2/2h">2/2h</option>
+                            <option value="4/4h">4/4h</option>
+                            <option value="nao_programada">Não programada</option>
+                            <option value="contraindicada">Contraindicada</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proteção Gástrica -->
+            <div class="form-group">
+                <h2 class="section-title">Proteção Gástrica</h2>
+                <div class="grid-2">
+                    <div>
+                        <label>Medicação em Uso:</label>
+                        <select id="protecao_gastrica" name="protecao_gastrica">
+                            <option value="">Selecione</option>
+                            <option value="omeprazol">Omeprazol</option>
+                            <option value="ranitidina">Ranitidina</option>
+                            <option value="pantoprazol">Pantoprazol</option>
+                            <option value="nao">Não está em uso</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Indicação:</label>
+                        <input type="text" id="indicacao_protecao" name="indicacao_protecao">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controle Glicêmico -->
+            <div class="form-group">
+                <h2 class="section-title">Controle Glicêmico</h2>
+                <div class="grid-3">
+                    <div>
+                        <label>Última Glicemia (mg/dL):</label>
+                        <input type="number" id="glicemia" name="glicemia">
+                    </div>
+                    <div>
+                        <label>Insulina em Uso:</label>
+                        <select id="insulina" name="insulina">
+                            <option value="">Selecione</option>
+                            <option value="regular">Regular</option>
+                            <option value="nph">NPH</option>
+                            <option value="ambas">Ambas</option>
+                            <option value="nao">Não está em uso</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Esquema:</label>
+                        <select id="esquema_insulina" name="esquema_insulina">
+                            <option value="">Selecione</option>
+                            <option value="fixo">Fixo</option>
+                            <option value="sliding">Sliding Scale</option>
+                            <option value="bomba">Bomba de infusão</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teste de Respiração Espontânea -->
+            <div class="form-group">
+                <h2 class="section-title">Teste de Respiração Espontânea</h2>
+                <div class="grid-2">
+                    <div>
+                        <label>Elegível para TRE:</label>
+                        <select id="tre_elegivel" name="tre_elegivel">
+                            <option value="">Selecione</option>
+                            <option value="sim">Sim</option>
+                            <option value="nao">Não</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Motivo se não elegível:</label>
+                        <input type="text" id="tre_motivo" name="tre_motivo">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trânsito Intestinal -->
+            <div class="form-group">
+                <h2 class="section-title">Trânsito Intestinal</h2>
+                <div class="grid-2">
+                    <div>
+                        <label>Última Evacuação:</label>
+                        <input type="date" id="ultima_evacuacao" name="ultima_evacuacao">
+                    </div>
+                    <div>
+                        <label>Laxativos em Uso:</label>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="lactulose" name="laxativos" value="lactulose">
+                            <label for="lactulose">Lactulose</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="bisacodil" name="laxativos" value="bisacodil">
+                            <label for="bisacodil">Bisacodil</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="fleet" name="laxativos" value="fleet">
+                            <label for="fleet">Fleet</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cateteres e Sondas -->
+            <div class="form-group">
+                <h2 class="section-title">Cateteres e Sondas</h2>
+                <div class="grid-2">
+                    <div>
+                        <label>Dispositivos em Uso:</label>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="cvc" name="dispositivos" value="cvc">
+                            <label for="cvc">CVC</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="svd" name="dispositivos" value="svd">
+                            <label for="svd">SVD</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="sng" name="dispositivos" value="sng">
+                            <label for="sng">SNG</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="sne" name="dispositivos" value="sne">
+                            <label for="sne">SNE</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="dreno" name="dispositivos" value="dreno">
+                            <label for="dreno">Dreno</label>
+                        </div>
+                    </div>
+                    <div>
+                        <label>Data de Inserção CVC:</label>
+                        <input type="date" id="data_cvc" name="data_cvc">
+                        <div id="tempo_cvc" class="info-box"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Antibióticos -->
+            <div class="form-group">
+                <h2 class="section-title">Antibióticos</h2>
+                <div class="grid-2">
+                    <div>
+                        <label>Em Uso de ATB:</label>
+                        <select id="uso_atb" name="uso_atb" onchange="toggleAtb()">
+                            <option value="">Selecione</option>
+                            <option value="sim">Sim</option>
+                            <option value="nao">Não</option>
+                        </select>
+                    </div>
+                    <div id="atb_info" style="display: none;">
+                        <label>Indicação:</label>
+                        <input type="text" id="indicacao_atb" name="indicacao_atb">
+                    </div>
+                </div>
+                <div id="atb_dias" style="display: none; margin-top: 10px;">
+                    <label>Dia do ATB:</label>
+                    <input type="number" id="dia_atb" name="dia_atb">
+                </div>
             </div>
         </form>
+
+        <div class="botoes">
+            <button type="button" class="botao botao-primario" onclick="salvarAvaliacao()">Salvar Avaliação</button>
+            <button type="button" class="botao botao-secundario" onclick="exportarCSV()">Exportar CSV</button>
+        </div>
     </div>
+
+    <script>
+        function calcularTempoInternacao() {
+            const dataInternacao = new Date(document.getElementById('data_internacao').value);
+            const hoje = new Date();
+            const diffTempo = Math.abs(hoje - dataInternacao);
+            const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
+            
+            document.getElementById('tempo_internacao').innerHTML = 
+                `Tempo de internação: ${diffDias} dia(s)`;
+        }
+
+        function toggleAlimentacao() {
+            const via = document.getElementById('via_alimentacao').value;
+            const dietaInfo = document.getElementById('dieta_info');
+            const volumeInfo = document.getElementById('volume_info');
+            
+            dietaInfo.style.display = via === 'npo' ? 'none' : 'block';
+            volumeInfo.style.display = (via === 'sng' || via === 'sne' || via === 'gastrostomia' || via === 'jejunostomia') ? 'block' : 'none';
+        }
+
+        function toggleAtb() {
+            const usoAtb = document.getElementById('uso_atb').value;
+            const atbInfo = document.getElementById('atb_info');
+            const atbDias = document.getElementById('atb_dias');
+            
+            atbInfo.style.display = usoAtb === 'sim' ? 'block' : 'none';
+            atbDias.style.display = usoAtb === 'sim' ? 'block' : 'none';
+        }
+
+        function salvarAvaliacao() {
+            const form = document.getElementById('avaliacaoForm');
+            const formData = new FormData(form);
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            // Adicionar checkbox groups
+            const checkboxGroups = ['analgesicos', 'sedativos', 'laxativos', 'dispositivos'];
+            checkboxGroups.forEach(group => {
+                data[group] = Array.from(document.querySelectorAll(`input[name="${group}"]:checked`))
+                    .map(cb => cb.value)
+                    .join(', ');
+            });
+
+            // Salvar no localStorage
+            const avaliacoes = JSON.parse(localStorage.getItem('avaliacoes') || '[]');
+            avaliacoes.push({
+                ...data,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('avaliacoes', JSON.stringify(avaliacoes));
+
+            alert('Avaliação salva com sucesso!');
+            form.reset();
+        }
+
+        function exportarCSV() {
+            const avaliacoes = JSON.parse(localStorage.getItem('avaliacoes') || '[]');
+            if (avaliacoes.length === 0) {
+                alert('Não há avaliações para exportar');
+                return;
+            }
+
+            // Criar cabeçalho CSV
+            const headers = Object.keys(avaliacoes[0]);
+            let csvContent = headers.join(',') + '\n';
+
+            // Adicionar dados
+            avaliacoes.forEach(avaliacao => {
+                const row = headers.map(header => {
+                    let value = avaliacao[header] || '';
+                    // Escapar valores com vírgulas
+                    if (value.includes(',')) {
+                        value = `"${value}"`;
+                    }
+                    return value;
+                });
+                csvContent += row.join(',') + '\n';
+            });
+
+            // Criar e baixar arquivo
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'avaliacoes_uti.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Calcular tempo de CVC quando a data é alterada
+        document.getElementById('data_cvc').addEventListener('change', function() {
+            const dataCVC = new Date(this.value);
+            const hoje = new Date();
+            const diffTempo = Math.abs(hoje - dataCVC);
+            const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
+            
+            document.getElementById('tempo_cvc').innerHTML = 
+                `Tempo de CVC: ${diffDias} dia(s)`;
+        });
+    </script>
+</body>
+</html>
     
