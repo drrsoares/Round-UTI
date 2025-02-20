@@ -205,7 +205,6 @@
                     <input type="number" id="volume_dieta" name="volume_dieta">
                 </div>
             </div>
-
             <!-- Analgesia -->
             <div class="form-group">
                 <h2 class="section-title">Analgesia</h2>
@@ -253,6 +252,10 @@
                         <div class="checkbox-container">
                             <input type="checkbox" id="dexmedetomidina" name="sedativos" value="dexmedetomidina">
                             <label for="dexmedetomidina">Dexmedetomidina</label>
+                        </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="ketamina" name="sedativos" value="ketamina">
+                            <label for="ketamina">Ketamina</label>
                         </div>
                     </div>
                     <div>
@@ -396,7 +399,7 @@
                         <input type="date" id="ultima_evacuacao" name="ultima_evacuacao">
                     </div>
                     <div>
-                        <label>Laxativos em Uso:</label>
+                        <label>Laxativos/Procinéticos em Uso:</label>
                         <div class="checkbox-container">
                             <input type="checkbox" id="lactulose" name="laxativos" value="lactulose">
                             <label for="lactulose">Lactulose</label>
@@ -409,6 +412,10 @@
                             <input type="checkbox" id="fleet" name="laxativos" value="fleet">
                             <label for="fleet">Fleet</label>
                         </div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="procineticos" name="laxativos" value="procineticos">
+                            <label for="procineticos">Procinéticos</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -419,31 +426,54 @@
                 <div class="grid-2">
                     <div>
                         <label>Dispositivos em Uso:</label>
-                        <div class="checkbox-container">
-                            <input type="checkbox" id="cvc" name="dispositivos" value="cvc">
-                            <label for="cvc">CVC</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="cvc" name="dispositivos" value="cvc" onchange="toggleDispositivo('cvc')">
+                                <label for="cvc">CVC</label>
+                                <div id="cvc_info" style="display: none; margin-left: 20px; margin-top: 5px;">
+                                    <select id="local_cvc" name="local_cvc" style="margin-bottom: 5px;">
+                                        <option value="">Selecione a localização</option>
+                                        <option value="subclavia">Sub-Clávia</option>
+                                        <option value="jugular">Jugular</option>
+                                        <option value="femoral">Femoral</option>
+                                    </select>
+                                    <input type="date" id="data_cvc" name="data_cvc" placeholder="Data de inserção">
+                                    <div id="tempo_cvc" class="info-box"></div>
+                                </div>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="svd" name="dispositivos" value="svd" onchange="toggleDispositivo('svd')">
+                                <label for="svd">SVD</label>
+                                <div id="svd_info" style="display: none; margin-left: 20px; margin-top: 5px;">
+                                    <input type="date" id="data_svd" name="data_svd" placeholder="Data de inserção">
+                                    <div id="tempo_svd" class="info-box"></div>
+                                </div>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="sng" name="dispositivos" value="sng" onchange="toggleDispositivo('sng')">
+                                <label for="sng">SNG</label>
+                                <div id="sng_info" style="display: none; margin-left: 20px; margin-top: 5px;">
+                                    <input type="date" id="data_sng" name="data_sng" placeholder="Data de inserção">
+                                    <div id="tempo_sng" class="info-box"></div>
+                                </div>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="sne" name="dispositivos" value="sne" onchange="toggleDispositivo('sne')">
+                                <label for="sne">SNE</label>
+                                <div id="sne_info" style="display: none; margin-left: 20px; margin-top: 5px;">
+                                    <input type="date" id="data_sne" name="data_sne" placeholder="Data de inserção">
+                                    <div id="tempo_sne" class="info-box"></div>
+                                </div>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="dreno" name="dispositivos" value="dreno" onchange="toggleDispositivo('dreno')">
+                                <label for="dreno">Dreno</label>
+                                <div id="dreno_info" style="display: none; margin-left: 20px; margin-top: 5px;">
+                                    <input type="date" id="data_dreno" name="data_dreno" placeholder="Data de inserção">
+                                    <div id="tempo_dreno" class="info-box"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="checkbox-container">
-                            <input type="checkbox" id="svd" name="dispositivos" value="svd">
-                            <label for="svd">SVD</label>
-                        </div>
-                        <div class="checkbox-container">
-                            <input type="checkbox" id="sng" name="dispositivos" value="sng">
-                            <label for="sng">SNG</label>
-                        </div>
-                        <div class="checkbox-container">
-                            <input type="checkbox" id="sne" name="dispositivos" value="sne">
-                            <label for="sne">SNE</label>
-                        </div>
-                        <div class="checkbox-container">
-                            <input type="checkbox" id="dreno" name="dispositivos" value="dreno">
-                            <label for="dreno">Dreno</label>
-                        </div>
-                    </div>
-                    <div>
-                        <label>Data de Inserção CVC:</label>
-                        <input type="date" id="data_cvc" name="data_cvc">
-                        <div id="tempo_cvc" class="info-box"></div>
                     </div>
                 </div>
             </div>
@@ -477,7 +507,6 @@
             <button type="button" class="botao botao-secundario" onclick="exportarCSV()">Exportar CSV</button>
         </div>
     </div>
-
     <script>
         function calcularTempoInternacao() {
             const dataInternacao = new Date(document.getElementById('data_internacao').value);
@@ -498,6 +527,22 @@
             volumeInfo.style.display = (via === 'sng' || via === 'sne' || via === 'gastrostomia' || via === 'jejunostomia') ? 'block' : 'none';
         }
 
+        function toggleDispositivo(dispositivo) {
+            const checkbox = document.getElementById(dispositivo);
+            const infoDiv = document.getElementById(`${dispositivo}_info`);
+            const dataInput = document.getElementById(`data_${dispositivo}`);
+            
+            infoDiv.style.display = checkbox.checked ? 'block' : 'none';
+            
+            if (!checkbox.checked) {
+                if (dataInput) dataInput.value = '';
+                if (dispositivo === 'cvc') {
+                    document.getElementById('local_cvc').value = '';
+                }
+                document.getElementById(`tempo_${dispositivo}`).innerHTML = '';
+            }
+        }
+
         function toggleAtb() {
             const usoAtb = document.getElementById('uso_atb').value;
             const atbInfo = document.getElementById('atb_info');
@@ -505,7 +550,26 @@
             
             atbInfo.style.display = usoAtb === 'sim' ? 'block' : 'none';
             atbDias.style.display = usoAtb === 'sim' ? 'block' : 'none';
+            
+            if (usoAtb !== 'sim') {
+                document.getElementById('indicacao_atb').value = '';
+                document.getElementById('dia_atb').value = '';
+            }
         }
+
+        // Atualizar cálculo de tempo para qualquer dispositivo
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'date' && e.target.id.startsWith('data_')) {
+                const dispositivo = e.target.id.replace('data_', '');
+                const data = new Date(e.target.value);
+                const hoje = new Date();
+                const diffTempo = Math.abs(hoje - data);
+                const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
+                
+                document.getElementById(`tempo_${dispositivo}`).innerHTML = 
+                    `Tempo de ${dispositivo.toUpperCase()}: ${diffDias} dia(s)`;
+            }
+        });
 
         function salvarAvaliacao() {
             const form = document.getElementById('avaliacaoForm');
@@ -524,6 +588,17 @@
                     .join(', ');
             });
 
+            // Adicionar informações específicas dos dispositivos
+            const dispositivos = ['cvc', 'svd', 'sng', 'sne', 'dreno'];
+            dispositivos.forEach(disp => {
+                if (document.getElementById(disp).checked) {
+                    data[`data_${disp}`] = document.getElementById(`data_${disp}`).value;
+                    if (disp === 'cvc') {
+                        data['local_cvc'] = document.getElementById('local_cvc').value;
+                    }
+                }
+            });
+
             // Salvar no localStorage
             const avaliacoes = JSON.parse(localStorage.getItem('avaliacoes') || '[]');
             avaliacoes.push({
@@ -534,6 +609,12 @@
 
             alert('Avaliação salva com sucesso!');
             form.reset();
+            
+            // Limpar todos os campos de informação adicionais
+            dispositivos.forEach(disp => {
+                document.getElementById(`${disp}_info`).style.display = 'none';
+                document.getElementById(`tempo_${disp}`).innerHTML = '';
+            });
         }
 
         function exportarCSV() {
@@ -571,18 +652,6 @@
             link.click();
             document.body.removeChild(link);
         }
-
-        // Calcular tempo de CVC quando a data é alterada
-        document.getElementById('data_cvc').addEventListener('change', function() {
-            const dataCVC = new Date(this.value);
-            const hoje = new Date();
-            const diffTempo = Math.abs(hoje - dataCVC);
-            const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
-            
-            document.getElementById('tempo_cvc').innerHTML = 
-                `Tempo de CVC: ${diffDias} dia(s)`;
-        });
     </script>
 </body>
 </html>
-    
