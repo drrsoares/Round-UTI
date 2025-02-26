@@ -502,6 +502,40 @@
         background-color: var(--danger-color);
         color: white;
       }
+      
+      /* JSON Viewer */
+      #jsonContent {
+        font-family: monospace;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        max-height: 60vh;
+      }
+      
+      .json-viewer {
+        width: 90vw;
+        max-width: 800px;
+      }
+      
+      .json-key {
+        color: #a6e22e;
+      }
+      
+      .json-string {
+        color: #fd971f;
+      }
+      
+      .json-number {
+        color: #66d9ef;
+      }
+      
+      .json-boolean {
+        color: #ae81ff;
+      }
+      
+      .json-null {
+        color: #f92672;
+      }
     </style>
 </head>
 <body>
@@ -530,6 +564,11 @@
         </div>
         <div>
           <button type="button" id="importDataBtn" class="btn btn-warning w-full">Importar Banco de Dados</button>
+        </div>
+      </div>
+      <div class="flex-container mt-4">
+        <div>
+          <button type="button" id="viewJsonBtn" class="btn btn-primary w-full">Visualizar Arquivo JSON</button>
         </div>
       </div>
     </div>
@@ -564,6 +603,21 @@
         <div class="btn-group">
           <button type="button" id="confirmImport" class="btn btn-danger" disabled>Importar e Substituir Dados</button>
           <button type="button" id="cancelImport" class="btn btn-primary">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal para visualizar JSON -->
+    <div id="jsonViewerModal" class="modal-overlay hidden">
+      <div class="modal-content json-viewer">
+        <button class="modal-close" id="closeJsonViewer">&times;</button>
+        <h2 class="text-xl font-semibold mb-4">Visualizador de JSON</h2>
+        <div class="dropzone" id="jsonDropzone">
+          <p>Arraste um arquivo JSON aqui ou clique para selecionar</p>
+          <input type="file" id="jsonFileInput" accept=".json" class="hidden">
+        </div>
+        <div id="jsonContent" class="mt-4 hidden p-4 rounded bg-gray-50 dark:bg-gray-800">
+          <!-- O conteúdo do JSON será exibido aqui -->
         </div>
       </div>
     </div>
@@ -1120,6 +1174,121 @@
         transaction.oncomplete = () => {
           checkLastBackup();
         };
+      }
+      
+      // ============ VISUALIZADOR DE JSON ============
+      
+      // Configurar modal do visualizador de JSON
+      const jsonViewerModal = document.getElementById('jsonViewerModal');
+      const closeJsonViewer = document.getElementById('closeJsonViewer');
+      const jsonDropzone = document.getElementById('jsonDropzone');
+      const jsonFileInput = document.getElementById('jsonFileInput');
+      const jsonContent = document.getElementById('jsonContent');
+      
+      // Botão para abrir o visualizador de JSON
+      document.getElementById('viewJsonBtn').addEventListener('click', () => {
+        jsonViewerModal.classList.remove('hidden');
+        jsonContent.classList.add('hidden');
+        jsonContent.innerHTML = '';
+      });
+      
+      // Fechar o visualizador de JSON
+      closeJsonViewer.addEventListener('click', () => {
+        jsonViewerModal.classList.add('hidden');
+      });
+      
+      // Configurar dropzone para o visualizador de JSON
+      jsonDropzone.addEventListener('click', () => {
+        jsonFileInput.click();
+      });
+      
+      jsonDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        jsonDropzone.classList.add('active');
+      });
+      
+      jsonDropzone.addEventListener('dragleave', () => {
+        jsonDropzone.classList.remove('active');
+      });
+      
+      jsonDropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        jsonDropzone.classList.remove('active');
+        
+        if (e.dataTransfer.files.length) {
+          jsonFileInput.files = e.dataTransfer.files;
+          readJsonFile();
+        }
+      });
+      
+      jsonFileInput.addEventListener('change', readJsonFile);
+      
+      // Função para ler e exibir o arquivo JSON
+      function readJsonFile() {
+        const file = jsonFileInput.files[0];
+        
+        if (!file) {
+          showToast('Selecione um arquivo JSON', 3000);
+          return;
+        }
+        
+        if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+          showToast('Selecione um arquivo JSON válido', 3000);
+          jsonFileInput.value = '';
+          return;
+        }
+        
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+          try {
+            const json = JSON.parse(e.target.result);
+            displayJson(json);
+          } catch (error) {
+            showToast('Erro ao processar o JSON: ' + error.message, 5000);
+            jsonContent.classList.add('hidden');
+          }
+        };
+        
+        reader.onerror = () => {
+          showToast('Erro ao ler o arquivo', 3000);
+          jsonContent.classList.add('hidden');
+        };
+        
+        reader.readAsText(file);
+      }
+      
+      // Função para exibir o JSON formatado
+      function displayJson(json) {
+        // Formatação bonita do JSON com indentação
+        const jsonString = JSON.stringify(json, null, 2);
+        const coloredJson = syntaxHighlight(jsonString);
+        
+        jsonContent.innerHTML = coloredJson;
+        jsonContent.classList.remove('hidden');
+        jsonDropzone.textContent = 'Arquivo carregado. Arraste outro arquivo para substituir.';
+      }
+      
+      // Função para destacar a sintaxe do JSON
+      function syntaxHighlight(json) {
+        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+          let cls = 'json-number';
+          if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+              cls = 'json-key';
+              match = match.replace(/"(.*)":/g, '<span class="json-key">"$1"</span>:');
+              return match;
+            } else {
+              cls = 'json-string';
+            }
+          } else if (/true|false/.test(match)) {
+            cls = 'json-boolean';
+          } else if (/null/.test(match)) {
+            cls = 'json-null';
+          }
+          return '<span class="' + cls + '">' + match + '</span>';
+        });
       }
 
       // ============ FUNÇÕES PRINCIPAIS DO FORMULÁRIO ============
