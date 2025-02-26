@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -612,6 +613,21 @@
 
           <div class="flex-container">
             <div class="form-group">
+              <label for="dataNascimento" class="form-label">Data de Nascimento:</label>
+              <input type="date" id="dataNascimento" name="dataNascimento" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="idade" class="form-label">Idade:</label>
+              <input type="text" id="idade" name="idade" class="form-control" readonly placeholder="Calculado automaticamente">
+            </div>
+            <div class="form-group">
+              <label for="peso" class="form-label">Peso (kg):</label>
+              <input type="number" id="peso" name="peso" class="form-control" step="0.1" min="0" placeholder="Informe o peso em kg" required>
+            </div>
+          </div>
+
+          <div class="flex-container">
+            <div class="form-group">
               <label for="dataInternacao" class="form-label">Data de Internação:</label>
               <input type="date" id="dataInternacao" name="dataInternacao" class="form-control" required>
             </div>
@@ -701,6 +717,52 @@
                 <option value="PSV">PSV</option>
                 <option value="Outros">Outros</option>
               </select>
+            </div>
+
+            <div id="ventilacaoParametros" class="hidden">
+              <div class="flex-container">
+                <div class="form-group">
+                  <label for="fio2" class="form-label">FiO2 (%):</label>
+                  <input type="number" id="fio2" name="fio2" class="form-control" min="21" max="100" placeholder="21-100">
+                </div>
+                <div class="form-group">
+                  <label for="fr" class="form-label">FR (irpm):</label>
+                  <input type="number" id="fr" name="fr" class="form-control" min="0" placeholder="Frequência respiratória">
+                </div>
+              </div>
+
+              <div class="flex-container">
+                <div class="form-group">
+                  <label for="pinsp" class="form-label">Pinsp (cmH2O):</label>
+                  <input type="number" id="pinsp" name="pinsp" class="form-control" placeholder="Pressão inspiratória">
+                </div>
+                <div class="form-group">
+                  <label for="vc" class="form-label">VC (ml):</label>
+                  <input type="number" id="vc" name="vc" class="form-control" placeholder="Volume corrente">
+                </div>
+              </div>
+
+              <div class="flex-container">
+                <div class="form-group">
+                  <label for="volm" class="form-label">Vol/m (ml/kg):</label>
+                  <input type="number" id="volm" name="volm" class="form-control" step="0.1" placeholder="Volume/min">
+                </div>
+                <div class="form-group">
+                  <label for="peep" class="form-label">PEEP (cmH2O):</label>
+                  <input type="number" id="peep" name="peep" class="form-control" placeholder="PEEP">
+                </div>
+              </div>
+
+              <div class="flex-container">
+                <div class="form-group">
+                  <label for="ppico" class="form-label">Ppico (cmH2O):</label>
+                  <input type="number" id="ppico" name="ppico" class="form-control" placeholder="Pressão de pico">
+                </div>
+                <div class="form-group">
+                  <label for="pplato" class="form-label">Pplato (cmH2O):</label>
+                  <input type="number" id="pplato" name="pplato" class="form-control" placeholder="Pressão de platô">
+                </div>
+              </div>
             </div>
 
             <div id="psvDetails" class="hidden">
@@ -804,6 +866,7 @@
               <option value="Normal">Normal</option>
               <option value="Constipado">Constipado</option>
               <option value="Diarreia">Diarreia</option>
+              <option value="Ausente">Ausente</option>
             </select>
           </div>
 
@@ -838,6 +901,7 @@
                   <option value="" disabled selected>Selecione um tipo</option>
                   <option value="Heparina">Heparina</option>
                   <option value="Enoxaparina">Enoxaparina</option>
+                  <option value="Oral">Oral</option>
                   <option value="Outros">Outros</option>
                 </select>
               </div>
@@ -1113,6 +1177,9 @@
         nomePaciente: document.getElementById('nomePaciente'),
         registroHospitalar: document.getElementById('registroHospitalar'),
         leito: document.getElementById('leito'),
+        dataNascimento: document.getElementById('dataNascimento'),
+        idade: document.getElementById('idade'),
+        peso: document.getElementById('peso'),
         dataInternacao: document.getElementById('dataInternacao'),
         dataPreenchimento: document.getElementById('dataPreenchimento'),
         tempoInternacao: document.getElementById('tempoInternacao'),
@@ -1124,6 +1191,15 @@
         tempoIntubacao: document.getElementById('tempoIntubacao'),
         statusIntubacao: document.getElementById('statusIntubacao'),
         modoVentilacao: document.getElementById('modoVentilacao'),
+        ventilacaoParametros: document.getElementById('ventilacaoParametros'),
+        fio2: document.getElementById('fio2'),
+        fr: document.getElementById('fr'),
+        pinsp: document.getElementById('pinsp'),
+        vc: document.getElementById('vc'),
+        volm: document.getElementById('volm'),
+        peep: document.getElementById('peep'),
+        ppico: document.getElementById('ppico'),
+        pplato: document.getElementById('pplato'),
         psvDetails: document.getElementById('psvDetails'),
         traqueostomiaContainer: document.getElementById('traqueostomiaContainer'),
         realizouTraqueostomia: document.getElementById('realizouTraqueostomia'),
@@ -1436,6 +1512,11 @@
         elements.nomePaciente.value = patient.nomePaciente || '';
         elements.registroHospitalar.value = patient.registroHospitalar || '';
         elements.leito.value = patient.leito || '';
+        elements.dataNascimento.value = patient.dataNascimento ? formatInputDate(patient.dataNascimento) : '';
+        if (patient.dataNascimento) {
+          calcularIdade();
+        }
+        elements.peso.value = patient.peso || '';
         elements.dataInternacao.value = patient.dataInternacao ? formatInputDate(patient.dataInternacao) : '';
         elements.dataPreenchimento.value = patient.dataPreenchimento ? formatInputDate(patient.dataPreenchimento) : '';
         elements.tempoInternacao.value = patient.tempoInternacao || '';
@@ -1455,6 +1536,20 @@
             
             if (elements.modoVentilacao) {
               elements.modoVentilacao.value = patient.modoVentilacao || '';
+              
+              if (patient.modoVentilacao) {
+                elements.ventilacaoParametros.classList.remove('hidden');
+                
+                // Preencher parâmetros de ventilação
+                if (elements.fio2) elements.fio2.value = patient.fio2 || '';
+                if (elements.fr) elements.fr.value = patient.fr || '';
+                if (elements.pinsp) elements.pinsp.value = patient.pinsp || '';
+                if (elements.vc) elements.vc.value = patient.vc || '';
+                if (elements.volm) elements.volm.value = patient.volm || '';
+                if (elements.peep) elements.peep.value = patient.peep || '';
+                if (elements.ppico) elements.ppico.value = patient.ppico || '';
+                if (elements.pplato) elements.pplato.value = patient.pplato || '';
+              }
               
               if (patient.modoVentilacao === 'PSV' && elements.psvDetails) {
                 elements.psvDetails.classList.remove('hidden');
@@ -1624,6 +1719,14 @@
               vazaoDroga.value = patient.vazaoDroga[i];
             }
             
+            // Atualizar a concentração calculada
+            const concentracaoDroga = drogaEntry.querySelector('.concentracao-calculada');
+            if (concentracaoDroga && patient.concentracaoDroga && patient.concentracaoDroga[i]) {
+              concentracaoDroga.value = patient.concentracaoDroga[i];
+            } else if (concentracaoDroga && drogaVasoativa.value && vazaoDroga.value && elements.peso.value) {
+              calcularConcentracaoDroga(drogaEntry);
+            }
+            
             elements.drogasContainer.appendChild(drogaEntry);
           }
         }
@@ -1784,6 +1887,7 @@
         
         // Esconder seções condicionais
         elements.intubacaoDetails.classList.add('hidden');
+        elements.ventilacaoParametros.classList.add('hidden');
         elements.psvDetails.classList.add('hidden');
         elements.traqueostomiaContainer.classList.add('hidden');
         elements.dataTraqueostomiaContainer.classList.add('hidden');
@@ -1792,6 +1896,7 @@
         elements.trombofilaxiaDetails.classList.add('hidden');
         
         // Resetar valores calculados
+        elements.idade.value = '';
         elements.tempoInternacao.value = '';
         elements.tempoIntubacao.value = '';
         elements.tempoDesdeEvacuacao.value = '';
@@ -1845,6 +1950,35 @@
         const end = new Date(endDate);
         const diffTime = Math.abs(end - start);
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      }
+
+      // Função para calcular idade a partir da data de nascimento
+      function calcularIdade() {
+        if (!elements.dataNascimento.value) {
+          elements.idade.value = '';
+          return;
+        }
+        
+        const dataNascimento = new Date(elements.dataNascimento.value);
+        const hoje = new Date();
+        
+        if (dataNascimento > hoje) {
+          showToast('A data de nascimento não pode ser no futuro', 5000);
+          elements.dataNascimento.value = '';
+          elements.idade.value = '';
+          return;
+        }
+        
+        let idade = hoje.getFullYear() - dataNascimento.getFullYear();
+        const m = hoje.getMonth() - dataNascimento.getMonth();
+        
+        if (m < 0 || (m === 0 && hoje.getDate() < dataNascimento.getDate())) {
+          idade--;
+        }
+        
+        elements.idade.value = idade + ' anos';
+        
+        formState.isDirty = true;
       }
 
       // Função para atualizar todas as datas máximas
@@ -1931,6 +2065,8 @@
             elements.dataTraqueostomia.value = '';
           }
         }
+        
+        formState.isDirty = true;
       }
       
       // Função para cálculo do tempo desde última evacuação
@@ -1972,6 +2108,8 @@
           elements.tempoDesdeEvacuacao.style.color = 'var(--success-color)';
           elements.tempoDesdeEvacuacao.style.fontWeight = 'normal';
         }
+        
+        formState.isDirty = true;
       }
 
       // Função para validação do formulário
@@ -2002,6 +2140,59 @@
         return isValid;
       }
 
+      // Função para calcular a concentração de droga vasoativa (μcg/kg/min)
+      function calcularConcentracaoDroga(drogaEntry) {
+        const pesoInput = elements.peso;
+        const drogaSelect = drogaEntry.querySelector('select[name="drogaVasoativa[]"]');
+        const vazaoInput = drogaEntry.querySelector('input[name="vazaoDroga[]"]');
+        const concentracaoOutput = drogaEntry.querySelector('.concentracao-calculada');
+        
+        if (!pesoInput || !pesoInput.value || !drogaSelect || !drogaSelect.value || !vazaoInput || !vazaoInput.value || !concentracaoOutput) {
+          return;
+        }
+        
+        const peso = parseFloat(pesoInput.value);
+        const vazao = parseFloat(vazaoInput.value);
+        
+        if (isNaN(peso) || isNaN(vazao) || peso <= 0 || vazao < 0) {
+          concentracaoOutput.value = '';
+          return;
+        }
+        
+        // Concentrações padrão das drogas em mg/ml
+        const concentracaoPadrao = {
+          'Noradrenalina': 16/250, // 16mg em 250ml (0.064 mg/ml)
+          'Dobutamina': 250/250,   // 250mg em 250ml (1 mg/ml)
+          'Adrenalina': 5/250,     // 5mg em 250ml (0.02 mg/ml)
+          'Vasopressina': 20/100,  // 20U em 100ml (0.2 U/ml)
+          'Nitroprussiato': 50/250, // 50mg em 250ml (0.2 mg/ml)
+          'Nitroglicerina': 50/250, // 50mg em 250ml (0.2 mg/ml)
+          'Amiodarona': 150/250,    // 150mg em 250ml (0.6 mg/ml)
+        };
+        
+        let concentracao = 0;
+        const droga = drogaSelect.value;
+        
+        if (droga !== 'Nenhuma') {
+          // Fórmula: (vazão (ml/h) × concentração (mg/ml) × 1000) / (peso (kg) × 60)
+          // Convertendo mg para μcg (×1000) e hora para minuto (÷60)
+          if (droga === 'Vasopressina') {
+            // Para Vasopressina, a unidade é U/kg/h
+            concentracao = (vazao * concentracaoPadrao[droga]) / peso;
+            concentracaoOutput.value = concentracao.toFixed(3) + ' U/kg/h';
+          } else if (concentracaoPadrao[droga]) {
+            concentracao = (vazao * concentracaoPadrao[droga] * 1000) / (peso * 60);
+            concentracaoOutput.value = concentracao.toFixed(2) + ' μcg/kg/min';
+          } else {
+            concentracaoOutput.value = 'N/A';
+          }
+        } else {
+          concentracaoOutput.value = '';
+        }
+        
+        formState.isDirty = true;
+      }
+
       // Funções para criar elementos dinâmicos
       function createCateterEntry() {
         const entry = document.createElement('div');
@@ -2014,6 +2205,7 @@
                 <option value="" disabled selected>Selecione uma opção</option>
                 <option value="Cateter Central">Cateter Central</option>
                 <option value="Cateter Periférico">Cateter Periférico</option>
+                <option value="Cateter de Diálise">Cateter de Diálise</option>
                 <option value="Outro">Outro</option>
               </select>
             </div>
@@ -2119,7 +2311,7 @@
           <div class="flex-container">
             <div class="form-group">
               <label for="drogaVasoativa" class="form-label">Droga Vasoativa:</label>
-              <select name="drogaVasoativa[]" class="form-control" required>
+              <select name="drogaVasoativa[]" class="form-control droga-vasoativa-select" required>
                 <option value="" disabled selected>Selecione uma droga</option>
                 <option value="Noradrenalina">Noradrenalina</option>
                 <option value="Vasopressina">Vasopressina</option>
@@ -2133,18 +2325,43 @@
             </div>
             <div class="form-group">
               <label for="vazaoDroga" class="form-label">Vazão (ml/h):</label>
-              <input type="number" name="vazaoDroga[]" class="form-control" placeholder="Informe a vazão">
+              <input type="number" name="vazaoDroga[]" class="form-control vazao-droga-input" placeholder="Informe a vazão">
             </div>
           </div>
+          
+          <div class="form-group">
+            <label class="form-label">Concentração calculada:</label>
+            <input type="text" class="form-control concentracao-calculada" name="concentracaoDroga[]" readonly placeholder="Será calculada automaticamente com base no peso">
+          </div>
+          
           <button type="button" class="btn btn-danger remove-btn">Remover</button>
         `;
         
-        // Marcar formulário como modificado quando o valor for alterado
-        entry.querySelectorAll('input, select').forEach(input => {
-          input.addEventListener('change', () => {
-            formState.isDirty = true;
-          });
+        const drogaSelect = entry.querySelector('.droga-vasoativa-select');
+        const vazaoInput = entry.querySelector('.vazao-droga-input');
+        
+        // Marcar formulário como modificado e calcular concentração quando valores forem alterados
+        drogaSelect.addEventListener('change', () => {
+          formState.isDirty = true;
+          calcularConcentracaoDroga(entry);
         });
+        
+        vazaoInput.addEventListener('change', () => {
+          formState.isDirty = true;
+          calcularConcentracaoDroga(entry);
+        });
+        
+        // Adicionar evento para recalcular quando o peso mudar
+        if (elements.peso) {
+          elements.peso.addEventListener('change', () => {
+            // Recalcular todas as concentrações de drogas
+            document.querySelectorAll('.medication-entry').forEach(drogaEntry => {
+              if (drogaEntry.querySelector('.concentracao-calculada')) {
+                calcularConcentracaoDroga(drogaEntry);
+              }
+            });
+          });
+        }
         
         // Adicionar evento para remover a entrada quando o botão de remover for clicado
         entry.querySelector('.remove-btn').addEventListener('click', () => {
@@ -2218,6 +2435,10 @@
               <option value="Metronidazol">Metro</option>
               <option value="Fluconazol">Fluco</option>
               <option value="Cefalotina">Cefalo</option>
+              <option value="Claritromicina">Claritromicina</option>
+              <option value="Clindamicina">Clindamicina</option>
+              <option value="Amicacina">Amicacina</option>
+              <option value="Azitromicina">Azitromicina</option>
               <option value="Outro">Outro</option>
             </select>
           </div>
@@ -2386,6 +2607,18 @@
                     <td>${data.leito || 'Não informado'}</td>
                   </tr>
                   <tr>
+                    <th>Data de Nascimento</th>
+                    <td>${formatarData(data.dataNascimento) || 'Não informado'}</td>
+                  </tr>
+                  <tr>
+                    <th>Idade</th>
+                    <td>${data.idade || 'Não calculado'}</td>
+                  </tr>
+                  <tr>
+                    <th>Peso</th>
+                    <td>${data.peso ? `${data.peso} kg` : 'Não informado'}</td>
+                  </tr>
+                  <tr>
                     <th>Internação</th>
                     <td>${formatarData(data.dataInternacao)} (${data.tempoInternacao || 'Não calculado'})</td>
                   </tr>
@@ -2417,6 +2650,43 @@
                     <td>${data.modoVentilacao || 'Não informado'}</td>
                   </tr>
             `;
+            
+            if (data.modoVentilacao) {
+              html += `
+                  <tr>
+                    <th>FiO2</th>
+                    <td>${data.fio2 ? `${data.fio2}%` : 'Não informado'}</td>
+                  </tr>
+                  <tr>
+                    <th>FR</th>
+                    <td>${data.fr ? `${data.fr} irpm` : 'Não informado'}</td>
+                  </tr>
+                  <tr>
+                    <th>Pinsp</th>
+                    <td>${data.pinsp ? `${data.pinsp} cmH2O` : 'Não informado'}</td>
+                  </tr>
+                  <tr>
+                    <th>VC</th>
+                    <td>${data.vc ? `${data.vc} ml` : 'Não informado'}</td>
+                  </tr>
+                  <tr>
+                    <th>Vol/m</th>
+                    <td>${data.volm ? `${data.volm} ml/kg` : 'Não informado'}</td>
+                  </tr>
+                  <tr>
+                    <th>PEEP</th>
+                    <td>${data.peep ? `${data.peep} cmH2O` : 'Não informado'}</td>
+                  </tr>
+                  <tr>
+                    <th>Ppico</th>
+                    <td>${data.ppico ? `${data.ppico} cmH2O` : 'Não informado'}</td>
+                  </tr>
+                  <tr>
+                    <th>Pplato</th>
+                    <td>${data.pplato ? `${data.pplato} cmH2O` : 'Não informado'}</td>
+                  </tr>
+              `;
+            }
             
             if (data.modoVentilacao === 'PSV' && data.podeExtubar) {
               html += `
@@ -2527,6 +2797,7 @@
                     <tr>
                       <th>Droga</th>
                       <th>Vazão (ml/h)</th>
+                      <th>Concentração</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2537,6 +2808,7 @@
                     <tr>
                       <td>${data.drogaVasoativa[i] || 'Não informado'}</td>
                       <td>${data.vazaoDroga && data.vazaoDroga[i] ? data.vazaoDroga[i] : 'Não informado'}</td>
+                      <td>${data.concentracaoDroga && data.concentracaoDroga[i] ? data.concentracaoDroga[i] : 'Não calculado'}</td>
                     </tr>
               `;
             }
@@ -2919,6 +3191,8 @@
       document.getElementById('addAntibiotico').addEventListener('click', () => elements.antibioticosContainer.appendChild(createAntibioticoEntry()));
 
       // Event Listeners para verificações condicionais
+      elements.dataNascimento.addEventListener('change', calcularIdade);
+
       elements.dataInternacao.addEventListener('change', function() {
         const dataInternacao = new Date(this.value);
         const dataPreenchimento = new Date(elements.dataPreenchimento.value);
@@ -2956,6 +3230,7 @@
           elements.dataIntubacao.value = '';
           limparCamposIntubacao();
           elements.modoVentilacao.value = '';
+          elements.ventilacaoParametros.classList.add('hidden');
           elements.psvDetails.classList.add('hidden');
         }
         
@@ -2963,6 +3238,7 @@
       });
 
       elements.modoVentilacao.addEventListener('change', function() {
+        elements.ventilacaoParametros.classList.toggle('hidden', !this.value);
         elements.psvDetails.classList.toggle('hidden', this.value !== 'PSV');
         formState.isDirty = true;
       });
