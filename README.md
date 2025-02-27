@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -8,6 +7,8 @@
     <title>Round Matinal - UTI</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.css" rel="stylesheet">
+    <!-- Adicionar biblioteca SheetJS -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
       :root {
         --primary-color: #5D5CDE;
@@ -343,6 +344,7 @@
       table {
         width: 100%;
         border-collapse: collapse;
+        margin: 1rem 0;
       }
 
       th, td {
@@ -536,6 +538,74 @@
       .json-null {
         color: #f92672;
       }
+      
+      /* Estilos para o relatório de impressão */
+      @media print {
+        body {
+          font-size: 12pt;
+          color: black;
+          background-color: white;
+        }
+        
+        .no-print {
+          display: none !important;
+        }
+        
+        .print-only {
+          display: block !important;
+        }
+        
+        .page-break {
+          page-break-after: always;
+        }
+        
+        table {
+          page-break-inside: avoid;
+        }
+        
+        thead {
+          display: table-header-group;
+        }
+        
+        tbody {
+          display: table-row-group;
+        }
+      }
+      
+      .print-only {
+        display: none;
+      }
+      
+      /* Email modal */
+      #emailModal .modal-content {
+        width: 600px;
+      }
+      
+      .report-patient-card {
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      
+      .report-patient-header {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        font-weight: bold;
+      }
+      
+      .report-section {
+        margin-bottom: 1rem;
+      }
+      
+      .report-section-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        background-color: rgba(93, 92, 222, 0.1);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+      }
     </style>
 </head>
 <body>
@@ -569,6 +639,15 @@
       <div class="flex-container mt-4">
         <div>
           <button type="button" id="viewJsonBtn" class="btn btn-primary w-full">Visualizar Arquivo JSON</button>
+        </div>
+      </div>
+      <!-- Novos botões para os recursos solicitados -->
+      <div class="flex-container mt-4">
+        <div>
+          <button type="button" id="emailRecentBtn" class="btn btn-success w-full">Email com 10 Últimas Entradas</button>
+        </div>
+        <div>
+          <button type="button" id="printReportBtn" class="btn btn-success w-full">Relatório para Impressão</button>
         </div>
       </div>
     </div>
@@ -620,6 +699,34 @@
           <!-- O conteúdo do JSON será exibido aqui -->
         </div>
       </div>
+    </div>
+    
+    <!-- Modal para enviar email -->
+    <div id="emailModal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <button class="modal-close" id="closeEmailModal">&times;</button>
+        <h2 class="text-xl font-semibold mb-4">Enviar por Email</h2>
+        <div class="form-group">
+          <label for="emailTo" class="form-label">Destinatário</label>
+          <input type="email" id="emailTo" class="form-control" placeholder="email@exemplo.com" required>
+        </div>
+        <div class="form-group">
+          <label for="emailSubject" class="form-label">Assunto</label>
+          <input type="text" id="emailSubject" class="form-control" value="Relatório Round Matinal - UTI" required>
+        </div>
+        <div class="form-group">
+          <label for="emailBody" class="form-label">Mensagem</label>
+          <textarea id="emailBody" class="form-control" rows="4" placeholder="Digite sua mensagem...">Segue em anexo o relatório com as 10 últimas entradas do Round Matinal da UTI.</textarea>
+        </div>
+        <div class="mt-4">
+          <button type="button" id="sendEmailBtn" class="btn btn-success w-full">Enviar Email</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Conteúdo do relatório para impressão -->
+    <div id="reportContent" class="hidden print-only">
+      <!-- Preenchido dinamicamente -->
     </div>
 
     <div class="tabs sticky-tabs hidden" id="formTabs">
@@ -1060,6 +1167,7 @@
           <button type="button" class="btn btn-primary" id="backToOutros">Voltar</button>
           <button type="button" class="btn btn-success" id="saveData">Salvar Dados</button>
           <button type="button" class="btn btn-primary" id="exportarCSV">Exportar para CSV</button>
+          <button type="button" class="btn btn-primary" id="exportarXLS">Exportar para Excel</button>
           <button type="button" class="btn btn-primary" id="exportarPDF">Exportar em PDF</button>
           <button type="button" class="btn btn-danger" id="clearForm">Limpar Formulário</button>
         </div>
@@ -1107,6 +1215,7 @@
               patientsStore.createIndex('by_name', 'nomePaciente', { unique: false });
               patientsStore.createIndex('by_register', 'registroHospitalar', { unique: false });
               patientsStore.createIndex('by_updated', 'updatedAt', { unique: false });
+              patientsStore.createIndex('by_date', 'dataPreenchimento', { unique: false });
             }
             
             // Criar object store para configurações se não existir
@@ -1415,6 +1524,7 @@
         // Botões
         saveData: document.getElementById('saveData'),
         exportarCSV: document.getElementById('exportarCSV'),
+        exportarXLS: document.getElementById('exportarXLS'),
         exportarPDF: document.getElementById('exportarPDF'),
         clearForm: document.getElementById('clearForm')
       };
@@ -1425,6 +1535,10 @@
       document.getElementById('exportDataBtn').addEventListener('click', exportDatabase);
       document.getElementById('importDataBtn').addEventListener('click', showImportModal);
       
+      // Botões para os novos recursos
+      document.getElementById('emailRecentBtn').addEventListener('click', showEmailModal);
+      document.getElementById('printReportBtn').addEventListener('click', generateAndPrintReport);
+      
       // Configurar modal de importação
       document.getElementById('closeImportModal').addEventListener('click', () => {
         document.getElementById('importModal').classList.add('hidden');
@@ -1433,6 +1547,12 @@
         document.getElementById('importModal').classList.add('hidden');
       });
       document.getElementById('confirmImport').addEventListener('click', importDatabase);
+      
+      // Configurar modal de e-mail
+      document.getElementById('closeEmailModal').addEventListener('click', () => {
+        document.getElementById('emailModal').classList.add('hidden');
+      });
+      document.getElementById('sendEmailBtn').addEventListener('click', sendEmailWithData);
       
       // Configurar dropzone para importação
       const dropzone = document.getElementById('dropzone');
@@ -1499,6 +1619,303 @@
           }
         });
       });
+      
+      // ============ NOVOS RECURSOS: EMAIL E RELATÓRIO ============
+      
+      // Mostrar modal de email para enviar últimas entradas
+      function showEmailModal() {
+        document.getElementById('emailModal').classList.remove('hidden');
+      }
+      
+      // Função para enviar email com dados
+      function sendEmailWithData() {
+        const emailTo = document.getElementById('emailTo').value;
+        const emailSubject = document.getElementById('emailSubject').value;
+        const emailBody = document.getElementById('emailBody').value;
+        
+        if (!emailTo) {
+          showToast('Por favor, informe o email do destinatário', 3000);
+          return;
+        }
+        
+        // Buscar as 10 últimas entradas
+        getRecentPatients(10)
+          .then(patients => {
+            if (patients.length === 0) {
+              showToast('Não há registros para enviar', 3000);
+              return;
+            }
+            
+            // Gerar CSV com os dados
+            const csvData = generateCSVFromPatients(patients);
+            
+            // Criar URL para o arquivo
+            const blob = new Blob([csvData], { type: 'text/csv' });
+            const csvUrl = URL.createObjectURL(blob);
+            
+            // Criar link de email com anexo
+            const emailLink = `mailto:${encodeURIComponent(emailTo)}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+            
+            // Como não podemos anexar arquivos diretamente via mailto, informamos o usuário
+            alert('Devido a limitações do navegador, não é possível anexar o arquivo automaticamente. ' +
+                  'A janela do seu aplicativo de email será aberta. Por favor, anexe o arquivo CSV que será baixado agora.');
+            
+            // Baixar o arquivo primeiro
+            const downloadLink = document.createElement('a');
+            downloadLink.href = csvUrl;
+            downloadLink.download = `round_matinal_ultimas_entradas_${formatDateForFilename(new Date())}.csv`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            // Abrir o cliente de email
+            setTimeout(() => {
+              window.location.href = emailLink;
+              document.getElementById('emailModal').classList.add('hidden');
+            }, 500);
+          })
+          .catch(error => {
+            console.error('Erro ao buscar dados recentes:', error);
+            showToast('Erro ao preparar dados para email', 3000);
+          });
+      }
+      
+      // Função para gerar e abrir relatório para impressão
+      function generateAndPrintReport() {
+        // Buscar as 10 últimas entradas do dia atual
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        getRecentPatientsByDate(today, 10)
+          .then(patients => {
+            if (patients.length === 0) {
+              showToast('Não há registros do dia de hoje para o relatório', 3000);
+              return;
+            }
+            
+            // Gerar o HTML do relatório
+            const reportContent = document.getElementById('reportContent');
+            reportContent.innerHTML = generateReportHTML(patients);
+            reportContent.classList.remove('hidden');
+            
+            // Imprimir o relatório
+            window.print();
+            
+            // Esconder o relatório após a impressão
+            setTimeout(() => {
+              reportContent.classList.add('hidden');
+            }, 1000);
+          })
+          .catch(error => {
+            console.error('Erro ao gerar relatório:', error);
+            showToast('Erro ao gerar relatório para impressão', 3000);
+          });
+      }
+      
+      // Função para buscar as últimas N entradas
+      function getRecentPatients(count) {
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction([PATIENTS_STORE], 'readonly');
+          const store = transaction.objectStore(PATIENTS_STORE);
+          const index = store.index('by_updated');
+          const request = index.openCursor(null, 'prev');
+          
+          let patients = [];
+          
+          request.onsuccess = event => {
+            const cursor = event.target.result;
+            
+            if (cursor && patients.length < count) {
+              patients.push(cursor.value);
+              cursor.continue();
+            } else {
+              resolve(patients);
+            }
+          };
+          
+          request.onerror = event => {
+            console.error("Erro ao buscar pacientes recentes:", event.target.error);
+            reject(event.target.error);
+          };
+        });
+      }
+      
+      // Função para buscar as últimas N entradas do dia
+      function getRecentPatientsByDate(date, count) {
+        return new Promise((resolve, reject) => {
+          const transaction = db.transaction([PATIENTS_STORE], 'readonly');
+          const store = transaction.objectStore(PATIENTS_STORE);
+          const index = store.index('by_updated');
+          const request = index.openCursor(null, 'prev');
+          
+          let patients = [];
+          const nextDay = new Date(date);
+          nextDay.setDate(nextDay.getDate() + 1);
+          
+          request.onsuccess = event => {
+            const cursor = event.target.result;
+            
+            if (cursor && patients.length < count) {
+              const patient = cursor.value;
+              const updatedDate = new Date(patient.updatedAt);
+              
+              if (updatedDate >= date && updatedDate < nextDay) {
+                patients.push(patient);
+              }
+              cursor.continue();
+            } else {
+              resolve(patients);
+            }
+          };
+          
+          request.onerror = event => {
+            console.error("Erro ao buscar pacientes por data:", event.target.error);
+            reject(event.target.error);
+          };
+        });
+      }
+      
+      // Função para gerar CSV a partir dos dados de pacientes
+      function generateCSVFromPatients(patients) {
+        if (patients.length === 0) return '';
+        
+        // Campos principais que queremos incluir
+        const fieldsToInclude = [
+          'nomePaciente', 'registroHospitalar', 'leito', 'idade', 'dataInternacao', 
+          'dataPreenchimento', 'pacienteIntubado', 'modoVentilacao', 'fio2', 'peep',
+          'diurese', 'usoTrombofilaxia', 'glicemiaAtual', 'elevacaoCabeceira'
+        ];
+        
+        // Cabeçalho melhorado para o CSV
+        const headers = [
+          'Nome do Paciente', 'Registro', 'Leito', 'Idade', 'Data Internação',
+          'Data Avaliação', 'Intubado', 'Modo Ventilação', 'FiO2 (%)', 'PEEP',
+          'Diurese 24h (ml)', 'Profilaxia TVP', 'Glicemia', 'Cabeceira'
+        ];
+        
+        // Adicionar cabeçalho
+        let csvContent = headers.join(',') + '\n';
+        
+        // Adicionar dados de cada paciente
+        patients.forEach(patient => {
+          const rowData = fieldsToInclude.map(field => {
+            // Formatar datas de maneira mais legível
+            if (field === 'dataInternacao' || field === 'dataPreenchimento') {
+              return patient[field] ? formatDateForCSV(new Date(patient[field])) : '';
+            }
+            
+            const value = patient[field] || '';
+            // Escapar campos com vírgulas ou aspas para o CSV
+            return value.toString().includes(',') ? `"${value.toString().replace(/"/g, '""')}"` : value;
+          });
+          
+          csvContent += rowData.join(',') + '\n';
+        });
+        
+        return csvContent;
+      }
+      
+      // Função para gerar HTML do relatório para impressão
+      function generateReportHTML(patients) {
+        const today = new Date();
+        const formattedDate = formatDate(today);
+        
+        let html = `
+          <div class="report-header">
+            <h1>Relatório Round Matinal - UTI</h1>
+            <p>Data: ${formattedDate}</p>
+            <p>Total de pacientes: ${patients.length}</p>
+          </div>
+        `;
+        
+        patients.forEach((patient, index) => {
+          html += `
+            <div class="report-patient-card">
+              <div class="report-patient-header">
+                <h2>${patient.nomePaciente || 'Sem nome'}</h2>
+                <div>Registro: ${patient.registroHospitalar || 'N/A'} | Leito: ${patient.leito || 'N/A'}</div>
+              </div>
+              
+              <div class="report-section">
+                <div class="report-section-title">Dados Gerais</div>
+                <div class="flex-container">
+                  <div><strong>Idade:</strong> ${patient.idade || 'N/A'}</div>
+                  <div><strong>Peso:</strong> ${patient.peso ? `${patient.peso} kg` : 'N/A'}</div>
+                  <div><strong>Internado em:</strong> ${formatDateForReport(patient.dataInternacao)}</div>
+                  <div><strong>Tempo internação:</strong> ${patient.tempoInternacao || 'N/A'}</div>
+                </div>
+              </div>
+              
+              <div class="report-section">
+                <div class="report-section-title">Status Ventilatório</div>
+                <div class="flex-container">
+                  <div><strong>Intubado:</strong> ${patient.pacienteIntubado || 'N/A'}</div>
+                  ${patient.pacienteIntubado === 'Sim' ? `
+                    <div><strong>Modo:</strong> ${patient.modoVentilacao || 'N/A'}</div>
+                    <div><strong>FiO2:</strong> ${patient.fio2 ? `${patient.fio2}%` : 'N/A'}</div>
+                    <div><strong>PEEP:</strong> ${patient.peep ? `${patient.peep} cmH2O` : 'N/A'}</div>
+                  ` : ''}
+                </div>
+                ${patient.pacienteIntubado === 'Sim' ? `
+                  <div class="flex-container">
+                    <div><strong>Tempo intubado:</strong> ${patient.tempoIntubacao || 'N/A'}</div>
+                    <div><strong>Traqueostomia:</strong> ${patient.realizouTraqueostomia ? 'Sim' : 'Não'}</div>
+                  </div>
+                ` : ''}
+              </div>
+              
+              <div class="report-section">
+                <div class="report-section-title">Parâmetros Importantes</div>
+                <div class="flex-container">
+                  <div><strong>Diurese:</strong> ${patient.diurese ? `${patient.diurese} ml/24h` : 'N/A'}</div>
+                  <div><strong>Alimentação:</strong> ${patient.viaAlimentacao || 'N/A'}</div>
+                  <div><strong>Trânsito:</strong> ${patient.transitoIntestinal || 'N/A'}</div>
+                  <div><strong>Glicemia:</strong> ${patient.glicemiaAtual ? `${patient.glicemiaAtual} mg/dl` : 'N/A'}</div>
+                </div>
+                <div class="flex-container">
+                  <div><strong>TVP:</strong> ${patient.usoTrombofilaxia || 'N/A'}</div>
+                  <div><strong>Proteção Gástrica:</strong> ${patient.usoProtecaoGastrica || 'N/A'}</div>
+                  <div><strong>Cabeceira:</strong> ${patient.elevacaoCabeceira || 'N/A'}</div>
+                </div>
+              </div>
+              
+              ${patient.pendenciasCondutas ? `
+                <div class="report-section">
+                  <div class="report-section-title">Pendências / Condutas</div>
+                  <p>${patient.pendenciasCondutas.replace(/\n/g, '<br>')}</p>
+                </div>
+              ` : ''}
+            </div>
+            ${index < patients.length - 1 ? '<div class="page-break"></div>' : ''}
+          `;
+        });
+        
+        return html;
+      }
+      
+      // Função para formatar data para nome de arquivo
+      function formatDateForFilename(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+      
+      // Função para formatar data para CSV
+      function formatDateForCSV(date) {
+        if (!(date instanceof Date)) return '';
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${day}/${month}/${year}`;
+      }
+      
+      // Função para formatar data para relatório
+      function formatDateForReport(dateStr) {
+        if (!dateStr) return 'N/A';
+        const date = new Date(dateStr);
+        return formatDateForCSV(date);
+      }
       
       // Iniciar novo paciente
       function startNewPatient() {
@@ -2091,7 +2508,7 @@
       
       // Adicionar botão de voltar ao menu principal
       const returnToMenuBtn = document.createElement('button');
-      returnToMenuBtn.className = 'btn btn-primary fixed top-4 left-4 z-20';
+      returnToMenuBtn.className = 'btn btn-primary fixed top-4 left-4 z-20 no-print';
       returnToMenuBtn.innerHTML = '<span>&larr;</span> Menu';
       returnToMenuBtn.addEventListener('click', backToMainMenu);
       document.body.appendChild(returnToMenuBtn);
@@ -3526,6 +3943,243 @@
         } catch (error) {
           console.error("Erro ao exportar CSV:", error);
           showToast('Erro ao exportar CSV: ' + error.message, 5000);
+        }
+      });
+
+      elements.exportarXLS.addEventListener('click', function() {
+        try {
+          if (!validateForm()) {
+            showToast('Por favor, preencha todos os campos obrigatórios para exportar', 5000);
+            return;
+          }
+          
+          const formData = new FormData(document.getElementById('roundMatinalForm'));
+          const dados = {};
+          
+          for (const [key, value] of formData.entries()) {
+            dados[key] = value;
+          }
+          
+          dados.timestamp = new Date().toISOString();
+          
+          // Organizar dados para Excel
+          const workbookData = [
+            // Dados de identificação
+            ['Round Matinal - UTI', '', '', ''],
+            ['Data de preenchimento', formatarData(dados.dataPreenchimento) || 'Não informado', '', ''],
+            ['', '', '', ''],
+            ['IDENTIFICAÇÃO DO PACIENTE', '', '', ''],
+            ['Nome', dados.nomePaciente || 'Não informado', '', ''],
+            ['Registro Hospitalar', dados.registroHospitalar || 'Não informado', '', ''],
+            ['Leito', dados.leito || 'Não informado', '', ''],
+            ['Data de Nascimento', formatarData(dados.dataNascimento) || 'Não informado', '', ''],
+            ['Idade', dados.idade || 'Não calculado', '', ''],
+            ['Peso', dados.peso ? `${dados.peso} kg` : 'Não informado', '', ''],
+            ['Data de Internação', formatarData(dados.dataInternacao) || 'Não informado', '', ''],
+            ['Tempo de Internação', dados.tempoInternacao || 'Não calculado', '', ''],
+            ['', '', '', ''],
+            
+            // Dados de ventilação
+            ['VENTILAÇÃO', '', '', ''],
+            ['Intubado', dados.pacienteIntubado || 'Não informado', '', '']
+          ];
+          
+          // Adicionar dados de ventilação se o paciente estiver intubado
+          if (dados.pacienteIntubado === 'Sim') {
+            workbookData.push(
+              ['Tempo de Intubação', dados.tempoIntubacao || 'Não calculado', '', ''],
+              ['Modo de Ventilação', dados.modoVentilacao || 'Não informado', '', '']
+            );
+            
+            if (dados.modoVentilacao) {
+              workbookData.push(
+                ['FiO2', dados.fio2 ? `${dados.fio2}%` : 'Não informado', '', ''],
+                ['FR', dados.fr ? `${dados.fr} irpm` : 'Não informado', '', ''],
+                ['Pinsp', dados.pinsp ? `${dados.pinsp} cmH2O` : 'Não informado', '', ''],
+                ['VC', dados.vc ? `${dados.vc} ml` : 'Não informado', '', ''],
+                ['Vol/m', dados.volm ? `${dados.volm} ml/kg` : 'Não informado', '', ''],
+                ['PEEP', dados.peep ? `${dados.peep} cmH2O` : 'Não informado', '', ''],
+                ['Ppico', dados.ppico ? `${dados.ppico} cmH2O` : 'Não informado', '', ''],
+                ['Pplato', dados.pplato ? `${dados.pplato} cmH2O` : 'Não informado', '', '']
+              );
+            }
+            
+            if (dados.modoVentilacao === 'PSV' && dados.podeExtubar) {
+              workbookData.push(['Pode Extubar', dados.podeExtubar, '', '']);
+            }
+            
+            if (dados.realizouTraqueostomia) {
+              workbookData.push(['Traqueostomia', `Sim, em ${formatarData(dados.dataTraqueostomia)}`, '', '']);
+            }
+          }
+          
+          workbookData.push(['', '', '', ''], ['DISPOSITIVOS', '', '', '']);
+          
+          // Adicionar cateteres
+          if (dados.tipoCateter && Array.isArray(dados.tipoCateter) && dados.tipoCateter.length > 0) {
+            workbookData.push(['CATETERES', '', '', ''], ['Tipo', 'Localização', 'Tempo de Uso', '']);
+            
+            for (let i = 0; i < dados.tipoCateter.length; i++) {
+              workbookData.push([
+                dados.tipoCateter[i] || 'Não informado',
+                dados.localizacaoCateter && dados.localizacaoCateter[i] ? dados.localizacaoCateter[i] : 'Não informado',
+                dados.tempoUsoCateter && dados.tempoUsoCateter[i] ? dados.tempoUsoCateter[i] : 'Não calculado',
+                ''
+              ]);
+            }
+          } else {
+            workbookData.push(['CATETERES', 'Não há cateteres registrados', '', '']);
+          }
+          
+          // Adicionar sondas
+          if (dados.tipoSonda && Array.isArray(dados.tipoSonda) && dados.tipoSonda.length > 0) {
+            workbookData.push(['', '', '', ''], ['SONDAS E DRENOS', '', '', ''], ['Tipo', 'Valor Drenado (ml)', '', '']);
+            
+            for (let i = 0; i < dados.tipoSonda.length; i++) {
+              workbookData.push([
+                dados.tipoSonda[i] || 'Não informado',
+                dados.valorDrenado && dados.valorDrenado[i] ? dados.valorDrenado[i] : 'Não informado',
+                '',
+                ''
+              ]);
+            }
+          } else {
+            workbookData.push(['', '', '', ''], ['SONDAS E DRENOS', 'Não há sondas ou drenos registrados', '', '']);
+          }
+          
+          // Adicionar drogas vasoativas
+          if (dados.drogaVasoativa && Array.isArray(dados.drogaVasoativa) && dados.drogaVasoativa.length > 0) {
+            workbookData.push(['', '', '', ''], ['DROGAS VASOATIVAS', '', '', ''], ['Droga', 'Vazão (ml/h)', 'Concentração', '']);
+            
+            for (let i = 0; i < dados.drogaVasoativa.length; i++) {
+              workbookData.push([
+                dados.drogaVasoativa[i] || 'Não informado',
+                dados.vazaoDroga && dados.vazaoDroga[i] ? dados.vazaoDroga[i] : 'Não informado',
+                dados.concentracaoDroga && dados.concentracaoDroga[i] ? dados.concentracaoDroga[i] : 'Não calculado',
+                ''
+              ]);
+            }
+          } else {
+            workbookData.push(['', '', '', ''], ['DROGAS VASOATIVAS', 'Não há drogas vasoativas registradas', '', '']);
+          }
+          
+          // Adicionar medicações
+          workbookData.push(['', '', '', ''], ['MEDICAÇÕES', '', '', '']);
+          
+          // Sedação
+          if (dados.medicacaosedacao && Array.isArray(dados.medicacaosedacao) && dados.medicacaosedacao.length > 0) {
+            workbookData.push(['SEDAÇÃO', '', '', ''], ['Medicação', 'Dose (mg/h)', '', '']);
+            
+            for (let i = 0; i < dados.medicacaosedacao.length; i++) {
+              workbookData.push([
+                dados.medicacaosedacao[i] || 'Não informado',
+                dados.dosesedacao && dados.dosesedacao[i] ? dados.dosesedacao[i] : 'Não informado',
+                '',
+                ''
+              ]);
+            }
+          } else {
+            workbookData.push(['SEDAÇÃO', 'Não há medicações de sedação registradas', '', '']);
+          }
+          
+          // Analgesia
+          if (dados.medicacaoanalgesia && Array.isArray(dados.medicacaoanalgesia) && dados.medicacaoanalgesia.length > 0) {
+            workbookData.push(['', '', '', ''], ['ANALGESIA', '', '', ''], ['Medicação', 'Dose (mg)', '', '']);
+            
+            for (let i = 0; i < dados.medicacaoanalgesia.length; i++) {
+              workbookData.push([
+                dados.medicacaoanalgesia[i] || 'Não informado',
+                dados.doseanalgesia && dados.doseanalgesia[i] ? dados.doseanalgesia[i] : 'Não informado',
+                '',
+                ''
+              ]);
+            }
+          } else {
+            workbookData.push(['', '', '', ''], ['ANALGESIA', 'Não há medicações de analgesia registradas', '', '']);
+          }
+          
+          // Antibióticos
+          if (dados.antibiotico && Array.isArray(dados.antibiotico) && dados.antibiotico.length > 0) {
+            workbookData.push(['', '', '', ''], ['ANTIBIÓTICOS', '', '', ''], ['Antibiótico', 'Tempo de Uso', '', '']);
+            
+            for (let i = 0; i < dados.antibiotico.length; i++) {
+              let antibioticoNome = dados.antibiotico[i];
+              if (antibioticoNome === 'Outro' && dados.outroAntibiotico && dados.outroAntibiotico[i]) {
+                antibioticoNome = dados.outroAntibiotico[i];
+              }
+              
+              workbookData.push([
+                antibioticoNome || 'Não informado',
+                dados.tempoUsoAntibiotico && dados.tempoUsoAntibiotico[i] ? dados.tempoUsoAntibiotico[i] : 'Não calculado',
+                '',
+                ''
+              ]);
+            }
+          } else {
+            workbookData.push(['', '', '', ''], ['ANTIBIÓTICOS', 'Não há antibióticos registrados', '', '']);
+          }
+          
+          // Outros Parâmetros
+          workbookData.push(['', '', '', ''], ['OUTROS PARÂMETROS', '', '', '']);
+          
+          // Alimentação
+          workbookData.push(['ALIMENTAÇÃO', '', '', '']);
+          workbookData.push(['Via', dados.viaAlimentacao || 'Não informado', '', '']);
+          if (dados.quantidadeDiaria) {
+            workbookData.push(['Quantidade', `${dados.quantidadeDiaria} ml/dia`, '', '']);
+          }
+          
+          // Trânsito Intestinal
+          workbookData.push(['', '', '', ''], ['TRÂNSITO INTESTINAL', '', '', '']);
+          workbookData.push(['Status', dados.transitoIntestinal || 'Não informado', '', '']);
+          workbookData.push(['Última Evacuação', dados.tempoDesdeEvacuacao || 'Não calculado', '', '']);
+          
+          // Proteção Gástrica
+          workbookData.push(['', '', '', ''], ['PROTEÇÃO GÁSTRICA', '', '', '']);
+          workbookData.push(['Em uso', dados.usoProtecaoGastrica || 'Não informado', '', '']);
+          if (dados.usoProtecaoGastrica === 'Sim') {
+            workbookData.push(['Tipo', dados.tipoProtecaoGastrica || 'Não informado', '', '']);
+          }
+          
+          // Trombofilaxia
+          workbookData.push(['', '', '', ''], ['TROMBOFILAXIA', '', '', '']);
+          workbookData.push(['Em uso', dados.usoTrombofilaxia || 'Não informado', '', '']);
+          if (dados.usoTrombofilaxia === 'Sim') {
+            workbookData.push(['Tipo', dados.tipoTrombofilaxia || 'Não informado', '', '']);
+          }
+          
+          // Controle Glicêmico
+          workbookData.push(['', '', '', ''], ['CONTROLE GLICÊMICO', '', '', '']);
+          workbookData.push(['Glicemia Atual', dados.glicemiaAtual ? `${dados.glicemiaAtual} mg/dL` : 'Não informado', '', '']);
+          workbookData.push(['Controle', dados.controleGlicemico || 'Não informado', '', '']);
+          
+          // Cabeceira e Conforto
+          workbookData.push(['', '', '', ''], ['CABECEIRA E CONFORTO', '', '', '']);
+          workbookData.push(['Elevação da Cabeceira', dados.elevacaoCabeceira || 'Não informado', '', '']);
+          workbookData.push(['Nível de Conforto', dados.nivelConforto || 'Não informado', '', '']);
+          
+          // Pendências/Condutas
+          if (dados.pendenciasCondutas) {
+            workbookData.push(['', '', '', ''], ['PENDÊNCIAS / CONDUTAS', '', '', '']);
+            workbookData.push([dados.pendenciasCondutas, '', '', '']);
+          }
+          
+          // Criar planilha Excel usando SheetJS
+          const ws = XLSX.utils.aoa_to_sheet(workbookData);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Round Matinal");
+          
+          // Aplicar alguns estilos através das propriedades da célula (largura da coluna)
+          const colWidths = [{ wch: 30 }, { wch: 30 }, { wch: 20 }, { wch: 20 }];
+          ws['!cols'] = colWidths;
+          
+          // Gerar e baixar o arquivo Excel
+          XLSX.writeFile(wb, `round_matinal_${dados.nomePaciente || 'paciente'}_${new Date().toISOString().slice(0,10)}.xlsx`);
+          
+          showToast('Excel exportado com sucesso!', 3000);
+        } catch (error) {
+          console.error("Erro ao exportar Excel:", error);
+          showToast('Erro ao exportar Excel: ' + error.message, 5000);
         }
       });
 
