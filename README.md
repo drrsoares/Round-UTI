@@ -1522,10 +1522,21 @@
             </div>
           </div>
           
-          <div class="form-group">
-            <label for="patientRecord" class="form-label required-field">Número de Registro</label>
-            <input type="text" id="patientRecord" class="form-control" required>
-            <div class="validation-message">Número de registro é obrigatório</div>
+          <div class="flex-container">
+            <div>
+              <div class="form-group">
+                <label for="patientRecord" class="form-label required-field">Número de Registro</label>
+                <input type="text" id="patientRecord" class="form-control" required>
+                <div class="validation-message">Número de registro é obrigatório</div>
+              </div>
+            </div>
+            <div>
+              <div class="form-group">
+                <label for="patientMedicalRecord" class="form-label required-field">Número do Prontuário</label>
+                <input type="text" id="patientMedicalRecord" class="form-control" required>
+                <div class="validation-message">Número do prontuário é obrigatório</div>
+              </div>
+            </div>
           </div>
           
           <div class="form-group">
@@ -1680,6 +1691,7 @@
               birthdate: '1965-05-10',
               gender: 'Masculino',
               record: '12345',
+              medicalRecord: '987654',
               contact: '(11) 98765-4321',
               admissionDate: '2023-06-15',
               diagnosis: 'Pneumonia comunitária',
@@ -1694,6 +1706,7 @@
               birthdate: '1978-11-22',
               gender: 'Feminino',
               record: '23456',
+              medicalRecord: '876543',
               contact: '(11) 91234-5678',
               admissionDate: '2023-06-20',
               diagnosis: 'Insuficiência cardíaca descompensada',
@@ -1894,6 +1907,7 @@
           { field: 'patientBirthdate', message: 'Data de nascimento é obrigatória' },
           { field: 'patientGender', message: 'Gênero é obrigatório' },
           { field: 'patientRecord', message: 'Número de registro é obrigatório' },
+          { field: 'patientMedicalRecord', message: 'Número do prontuário é obrigatório' },
           { field: 'patientAdmissionDate', message: 'Data de internação é obrigatória' },
           { field: 'patientDiagnosis', message: 'Diagnóstico é obrigatório' }
         ];
@@ -2081,6 +2095,7 @@
             <h2>${patient.name} ${statusBadge}</h2>
             <div class="patient-basic-info">
               <p><strong>Registro:</strong> ${patient.record}</p>
+              <p><strong>Prontuário:</strong> ${patient.medicalRecord}</p>
               <p><strong>Idade:</strong> ${age} anos (${formatDate(patient.birthdate)})</p>
               <p><strong>Gênero:</strong> ${patient.gender}</p>
               <p><strong>Contato:</strong> ${patient.contact || 'Não informado'}</p>
@@ -2518,6 +2533,7 @@
         const patientsData = patients.map(patient => {
           return {
             'Registro': patient.record,
+            'Prontuário': patient.medicalRecord,
             'Nome': patient.name,
             'Data de Nascimento': formatDate(patient.birthdate),
             'Gênero': patient.gender,
@@ -2537,6 +2553,7 @@
           const patient = patients.find(p => p.id === record.patientId);
           const patientName = patient ? patient.name : '';
           const patientRecord = patient ? patient.record : '';
+          const patientMedicalRecord = patient ? patient.medicalRecord : '';
           
           // Transformar medicamentos em texto
           const medications = record.medications
@@ -2545,6 +2562,7 @@
           
           return {
             'Registro do Paciente': patientRecord,
+            'Prontuário do Paciente': patientMedicalRecord,
             'Nome do Paciente': patientName,
             'Data': formatDate(record.date),
             'Hora': record.time,
@@ -2648,6 +2666,7 @@
         document.getElementById('patientBirthdate').value = patient.birthdate;
         document.getElementById('patientGender').value = patient.gender;
         document.getElementById('patientRecord').value = patient.record;
+        document.getElementById('patientMedicalRecord').value = patient.medicalRecord || '';
         document.getElementById('patientContact').value = patient.contact || '';
         document.getElementById('patientAdmissionDate').value = patient.admissionDate;
         document.getElementById('patientDiagnosis').value = patient.diagnosis;
@@ -2678,6 +2697,7 @@
           birthdate: document.getElementById('patientBirthdate').value,
           gender: document.getElementById('patientGender').value,
           record: document.getElementById('patientRecord').value,
+          medicalRecord: document.getElementById('patientMedicalRecord').value,
           contact: document.getElementById('patientContact').value,
           admissionDate: document.getElementById('patientAdmissionDate').value,
           diagnosis: document.getElementById('patientDiagnosis').value,
