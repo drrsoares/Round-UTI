@@ -9,6 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
+    /* Mantido o mesmo CSS do código anterior */
     :root {
       --primary-color: #5D5CDE;
       --secondary-color: #8382eb;
@@ -1038,18 +1039,54 @@
     }
   </style>
   <script>
-    // Função para mostrar modal - DEFINIDA GLOBALMENTE
+    // Variáveis globais para armazenar os dados
+    window.appData = {
+      patients: [],
+      records: [],
+      selectedPatientId: null,
+      editingPatientId: null,
+      editingRecordId: null
+    };
+    
+    // CORREÇÃO: Função switchTab aprimorada e mais direta
+    function switchTab(tabId) {
+      console.log('Trocando para aba: ' + tabId);
+      
+      // Atualizar as classes das abas - simplificado e mais direto
+      document.querySelectorAll('.tab').forEach(function(tab) {
+        if (tab.getAttribute('data-tab') === tabId) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+      
+      // Atualizar as classes dos conteúdos das abas - simplificado e mais direto
+      document.querySelectorAll('.tab-content').forEach(function(content) {
+        if (content.id === tabId) {
+          content.classList.add('active');
+        } else {
+          content.classList.remove('active');
+        }
+      });
+      
+      // CORREÇÃO: Log adicional para debug
+      console.log('Aba ativa agora: ' + document.querySelector('.tab.active').getAttribute('data-tab'));
+      console.log('Conteúdo ativo agora: ' + document.querySelector('.tab-content.active').id);
+    }
+    
+    // Função para mostrar modal
     function showModal(modalId) {
       console.log('Abrindo modal: ' + modalId);
       document.getElementById(modalId).style.display = 'block';
       
       // Se for o modal de paciente e for para novo paciente, prepara-o
-      if (modalId === 'patientModal') {
+      if (modalId === 'patientModal' && !window.appData.editingPatientId) {
         prepareNewPatient();
       }
     }
     
-    // Função para esconder modal - DEFINIDA GLOBALMENTE
+    // Função para esconder modal
     function hideModal(modalId) {
       console.log('Fechando modal: ' + modalId);
       document.getElementById(modalId).style.display = 'none';
@@ -1067,7 +1104,217 @@
       document.getElementById('patientModalTitle').textContent = 'Novo Paciente';
       
       // Limpar ID de edição
-      window.editingPatientId = null;
+      window.appData.editingPatientId = null;
+    }
+    
+    // Função para selecionar um paciente
+    function selectPatient(patientId) {
+      console.log('Selecionando paciente: ' + patientId);
+      window.appData.selectedPatientId = patientId;
+      
+      // Atualizar visualização da lista
+      const patientCards = document.querySelectorAll('.patient-card');
+      patientCards.forEach(card => {
+        if (card.dataset.id === patientId) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      });
+      
+      // Atualizar visualização de detalhes
+      renderPatientDetails(patientId);
+      
+      // Atualizar histórico
+      document.getElementById('historyContainer').classList.remove('hidden');
+      document.getElementById('historyEmptyState').classList.add('hidden');
+      renderHistoryTimeline(patientId);
+      
+      // Atualizar estatísticas
+      document.getElementById('statsContainer').classList.remove('hidden');
+      document.getElementById('statsEmptyState').classList.add('hidden');
+      renderStats(patientId);
+      
+      // Habilitar botão de registro diário
+      const patient = window.appData.patients.find(p => p.id === patientId);
+      const newDailyRecordBtn = document.getElementById('newDailyRecordBtn');
+      
+      if (patient && patient.isActive) {
+        newDailyRecordBtn.classList.remove('opacity-50');
+        newDailyRecordBtn.disabled = false;
+      } else {
+        newDailyRecordBtn.classList.add('opacity-50');
+        newDailyRecordBtn.disabled = true;
+      }
+      
+      // CORREÇÃO: Trocar para a aba de detalhes - chamando diretamente
+      setTimeout(function() {
+        // Forçar mudança para a aba de detalhes após um pequeno atraso
+        const detailsTab = document.querySelector('.tab[data-tab="patientDetails"]');
+        if (detailsTab) {
+          detailsTab.click();
+        } else {
+          // Fallback mais forte para trocar de aba
+          switchTab('patientDetails');
+        }
+      }, 50);
+    }
+    
+    // Função para criar um novo registro diário
+    function newDailyRecord() {
+      console.log('Criando novo registro diário para paciente: ' + window.appData.selectedPatientId);
+      window.appData.editingRecordId = null;
+      
+      // Limpar formulário
+      document.getElementById('recordForm').reset();
+      
+      // Preencher data e hora atual
+      const now = new Date();
+      document.getElementById('recordDate').value = now.toISOString().slice(0, 10);
+      document.getElementById('recordTime').value = now.toTimeString().slice(0, 5);
+      
+      // Esconder seção de alta
+      document.getElementById('dischargePatient').checked = false;
+      document.getElementById('dischargeSection').classList.add('hidden');
+      
+      // Limpar lista de medicamentos
+      const medicationsList = document.getElementById('medicationsList');
+      medicationsList.innerHTML = `
+        <div class="medication-entry">
+          <div class="flex-container">
+            <div>
+              <div class="form-group">
+                <label for="medicationName" class="form-label">Nome</label>
+                <input type="text" id="medicationName" class="form-control medication-name">
+              </div>
+            </div>
+            <div>
+              <div class="form-group">
+                <label for="medicationDose" class="form-label">Dose</label>
+                <input type="text" id="medicationDose" class="form-control medication-dose">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="medicationRoute" class="form-label">Via de Administração</label>
+            <select id="medicationRoute" class="form-control medication-route">
+              <option value="">Selecione</option>
+              <option value="Oral">Oral</option>
+              <option value="Intravenosa">Intravenosa</option>
+              <option value="Intramuscular">Intramuscular</option>
+              <option value="Subcutânea">Subcutânea</option>
+              <option value="Inalatória">Inalatória</option>
+              <option value="Tópica">Tópica</option>
+              <option value="Outras">Outras</option>
+            </select>
+          </div>
+        </div>
+      `;
+      
+      // Mostrar formulário
+      document.getElementById('dailyRecordForm').classList.remove('hidden');
+      document.getElementById('dailyRecordEmptyState').classList.add('hidden');
+      
+      // Limpar validação
+      clearValidation(document.getElementById('recordForm'));
+      
+      // CORREÇÃO: Trocar para a aba de registro diário - chamando diretamente
+      setTimeout(function() {
+        // Forçar mudança para a aba de registro diário após um pequeno atraso
+        const recordTab = document.querySelector('.tab[data-tab="dailyRecord"]');
+        if (recordTab) {
+          recordTab.click();
+        } else {
+          // Fallback mais forte para trocar de aba
+          switchTab('dailyRecord');
+        }
+      }, 50);
+    }
+    
+    // Função para visualizar um registro
+    function viewRecord(recordId) {
+      console.log('Visualizando registro:', recordId);
+      
+      const record = window.appData.records.find(r => r.id === recordId);
+      if (!record) return;
+      
+      const patient = window.appData.patients.find(p => p.id === record.patientId);
+      const patientName = patient ? patient.name : 'Paciente desconhecido';
+      
+      const medications = record.medications.map(med => 
+        `<li>${med.name} ${med.dose} (${med.route})</li>`
+      ).join('');
+      
+      const vitals = [];
+      if (record.vitalSigns.temperature) vitals.push(`<li>Temperatura: ${record.vitalSigns.temperature}°C</li>`);
+      if (record.vitalSigns.heartRate) vitals.push(`<li>Freq. Cardíaca: ${record.vitalSigns.heartRate} bpm</li>`);
+      if (record.vitalSigns.bloodPressure) vitals.push(`<li>Pressão Arterial: ${record.vitalSigns.bloodPressure} mmHg</li>`);
+      if (record.vitalSigns.respiratoryRate) vitals.push(`<li>Freq. Respiratória: ${record.vitalSigns.respiratoryRate} irpm</li>`);
+      if (record.vitalSigns.oxygenSaturation) vitals.push(`<li>Saturação O₂: ${record.vitalSigns.oxygenSaturation}%</li>`);
+      if (record.vitalSigns.painLevel) vitals.push(`<li>Nível de Dor: ${record.vitalSigns.painLevel}/10</li>`);
+      
+      const hasDischarge = record.discharge !== null;
+      
+      const recordDetails = document.getElementById('recordDetails');
+      recordDetails.innerHTML = `
+        <div class="record-patient-info">
+          <h3>${patientName}</h3>
+          <p>Data/Hora: ${formatDateTime(record.date, record.time)}</p>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="record-vital-signs">
+          <h4>Sinais Vitais</h4>
+          ${vitals.length > 0 ? `<ul>${vitals.join('')}</ul>` : '<p>Nenhum sinal vital registrado</p>'}
+        </div>
+        
+        <div class="record-medications">
+          <h4>Medicamentos</h4>
+          ${medications.length > 0 ? `<ul>${medications}</ul>` : '<p>Nenhum medicamento registrado</p>'}
+        </div>
+        
+        ${record.procedures ? `
+          <div class="record-procedures">
+            <h4>Procedimentos</h4>
+            <p>${record.procedures}</p>
+          </div>
+        ` : ''}
+        
+        ${record.observations ? `
+          <div class="record-observations">
+            <h4>Observações</h4>
+            <p>${record.observations}</p>
+          </div>
+        ` : ''}
+        
+        ${record.nutritionalStatus ? `
+          <div class="record-nutrition">
+            <h4>Estado Nutricional</h4>
+            <p>${record.nutritionalStatus}</p>
+          </div>
+        ` : ''}
+        
+        ${record.mobilityStatus ? `
+          <div class="record-mobility">
+            <h4>Mobilidade</h4>
+            <p>${record.mobilityStatus}</p>
+          </div>
+        ` : ''}
+        
+        ${hasDischarge ? `
+          <div class="divider"></div>
+          
+          <div class="record-discharge">
+            <h4>Informações de Alta</h4>
+            <p><strong>Motivo da Alta:</strong> ${record.discharge.reason}</p>
+            <p><strong>Resumo da Alta:</strong> ${record.discharge.summary}</p>
+            ${record.discharge.followUp ? `<p><strong>Instruções de Acompanhamento:</strong> ${record.discharge.followUp}</p>` : ''}
+          </div>
+        ` : ''}
+      `;
+      
+      showModal('viewRecordModal');
     }
   </script>
 </head>
@@ -1091,12 +1338,13 @@
         <input type="text" id="searchPatients" class="form-control" placeholder="Buscar pacientes...">
       </div>
       
+      <!-- CORREÇÃO: Adicionado onclick direto nas abas -->
       <div class="sticky-tabs tabs">
-        <div class="tab active" data-tab="patientList">Lista de Pacientes</div>
-        <div class="tab" data-tab="patientDetails">Detalhes do Paciente</div>
-        <div class="tab" data-tab="dailyRecord">Registro Diário</div>
-        <div class="tab" data-tab="patientHistory">Histórico</div>
-        <div class="tab" data-tab="patientStats">Estatísticas</div>
+        <div class="tab active" data-tab="patientList" onclick="switchTab('patientList')">Lista de Pacientes</div>
+        <div class="tab" data-tab="patientDetails" onclick="switchTab('patientDetails')">Detalhes do Paciente</div>
+        <div class="tab" data-tab="dailyRecord" onclick="switchTab('dailyRecord')">Registro Diário</div>
+        <div class="tab" data-tab="patientHistory" onclick="switchTab('patientHistory')">Histórico</div>
+        <div class="tab" data-tab="patientStats" onclick="switchTab('patientStats')">Estatísticas</div>
       </div>
       
       <div id="patientList" class="tab-content active">
@@ -1151,7 +1399,7 @@
           <button id="editPatientBtn" class="btn btn-info">
             <i class="fas fa-edit"></i> Editar
           </button>
-          <button id="newDailyRecordBtn" class="btn btn-primary">
+          <button id="newDailyRecordBtn" class="btn btn-primary" onclick="newDailyRecord()">
             <i class="fas fa-notes-medical"></i> Novo Registro
           </button>
           <button id="dischargePatientBtn" class="btn btn-success">
@@ -1510,7 +1758,7 @@
       </div>
     </div>
     
-    <!-- MODAIS - NOVA IMPLEMENTAÇÃO -->
+    <!-- MODAIS -->
     <!-- Modal de Novo/Editar Paciente -->
     <div id="patientModal" class="modal">
       <div class="modal-content">
@@ -1652,188 +1900,6 @@
         }
       });
       
-      // Dados simulados para armazenamento (em substituição ao localStorage)
-      let patients = [];
-      let records = [];
-      let selectedPatientId = null;
-      window.editingPatientId = null;
-      let editingRecordId = null;
-      
-      // Elementos do DOM
-      const tabs = document.querySelectorAll('.tab');
-      const tabContents = document.querySelectorAll('.tab-content');
-      const patientListContainer = document.getElementById('patientListContainer');
-      const emptyPatientList = document.getElementById('emptyPatientList');
-      const selectedPatientInfo = document.getElementById('selectedPatientInfo');
-      const patientActions = document.getElementById('patientActions');
-      const dailyRecordForm = document.getElementById('dailyRecordForm');
-      const dailyRecordEmptyState = document.getElementById('dailyRecordEmptyState');
-      const historyContainer = document.getElementById('historyContainer');
-      const historyEmptyState = document.getElementById('historyEmptyState');
-      const statsContainer = document.getElementById('statsContainer');
-      const statsEmptyState = document.getElementById('statsEmptyState');
-      const toast = document.getElementById('toast');
-      const painLevel = document.getElementById('painLevel');
-      const painLevelValue = document.getElementById('painLevelValue');
-      const searchPatients = document.getElementById('searchPatients');
-      const statusFilter = document.getElementById('statusFilter');
-      const sortPatients = document.getElementById('sortPatients');
-      const dischargePatient = document.getElementById('dischargePatient');
-      const dischargeSection = document.getElementById('dischargeSection');
-      
-      // Buttons
-      const editPatientBtn = document.getElementById('editPatientBtn');
-      const newDailyRecordBtn = document.getElementById('newDailyRecordBtn');
-      const dischargePatientBtn = document.getElementById('dischargePatientBtn');
-      const deletePatientBtn = document.getElementById('deletePatientBtn');
-      const addMedicationBtn = document.getElementById('addMedicationBtn');
-      const saveRecordBtn = document.getElementById('saveRecordBtn');
-      const cancelRecordBtn = document.getElementById('cancelRecordBtn');
-      const confirmYesBtn = document.getElementById('confirmYesBtn');
-      const exportAllBtn = document.getElementById('exportAllBtn');
-      const exportPatientBtn = document.getElementById('exportPatientBtn');
-      
-      // Forms
-      const patientForm = document.getElementById('patientForm');
-      const recordForm = document.getElementById('recordForm');
-      
-      // Adicionar dados de exemplo
-      function addSampleData() {
-        if (patients.length === 0) {
-          // Adicionar pacientes de exemplo
-          const samplePatients = [
-            {
-              id: generateId(),
-              name: 'João Silva',
-              birthdate: '1965-05-10',
-              gender: 'Masculino',
-              record: '12345',
-              medicalRecord: '987654',
-              contact: '(11) 98765-4321',
-              admissionDate: '2023-06-15',
-              diagnosis: 'Pneumonia comunitária',
-              allergies: 'Penicilina',
-              notes: 'Paciente com comorbidade de hipertensão e diabetes.',
-              dischargeDate: null,
-              isActive: true
-            },
-            {
-              id: generateId(),
-              name: 'Maria Oliveira',
-              birthdate: '1978-11-22',
-              gender: 'Feminino',
-              record: '23456',
-              medicalRecord: '876543',
-              contact: '(11) 91234-5678',
-              admissionDate: '2023-06-20',
-              diagnosis: 'Insuficiência cardíaca descompensada',
-              allergies: 'Sulfas',
-              notes: 'Paciente apresenta edema em membros inferiores.',
-              dischargeDate: null,
-              isActive: true
-            }
-          ];
-          
-          patients = samplePatients;
-          
-          // Adicionar registros de exemplo
-          const sampleRecords = [
-            {
-              id: generateId(),
-              patientId: patients[0].id,
-              date: '2023-06-15',
-              time: '14:30',
-              vitalSigns: {
-                temperature: 38.5,
-                heartRate: 95,
-                bloodPressure: '130/85',
-                respiratoryRate: 20,
-                oxygenSaturation: 93,
-                painLevel: 3
-              },
-              medications: [
-                {
-                  name: 'Ceftriaxona',
-                  dose: '1g',
-                  route: 'Intravenosa'
-                },
-                {
-                  name: 'Dipirona',
-                  dose: '1g',
-                  route: 'Oral'
-                }
-              ],
-              procedures: 'Coleta de hemoculturas',
-              observations: 'Paciente relata melhora da dispneia após medicação.',
-              nutritionalStatus: 'Adequado',
-              mobilityStatus: 'Deambula com auxílio',
-              discharge: null
-            },
-            {
-              id: generateId(),
-              patientId: patients[0].id,
-              date: '2023-06-16',
-              time: '09:00',
-              vitalSigns: {
-                temperature: 37.2,
-                heartRate: 88,
-                bloodPressure: '125/80',
-                respiratoryRate: 18,
-                oxygenSaturation: 95,
-                painLevel: 2
-              },
-              medications: [
-                {
-                  name: 'Ceftriaxona',
-                  dose: '1g',
-                  route: 'Intravenosa'
-                }
-              ],
-              procedures: 'Raio-X de tórax',
-              observations: 'Melhora dos sintomas respiratórios.',
-              nutritionalStatus: 'Adequado',
-              mobilityStatus: 'Deambula sem auxílio',
-              discharge: null
-            },
-            {
-              id: generateId(),
-              patientId: patients[1].id,
-              date: '2023-06-20',
-              time: '10:15',
-              vitalSigns: {
-                temperature: 36.8,
-                heartRate: 102,
-                bloodPressure: '160/95',
-                respiratoryRate: 22,
-                oxygenSaturation: 91,
-                painLevel: 4
-              },
-              medications: [
-                {
-                  name: 'Furosemida',
-                  dose: '40mg',
-                  route: 'Intravenosa'
-                },
-                {
-                  name: 'Enalapril',
-                  dose: '10mg',
-                  route: 'Oral'
-                }
-              ],
-              procedures: 'Aferição de peso e diurese',
-              observations: 'Paciente com dispneia aos pequenos esforços e edema +2/+4 em MMII.',
-              nutritionalStatus: 'Inapetente',
-              mobilityStatus: 'Restrito ao leito',
-              discharge: null
-            }
-          ];
-          
-          records = sampleRecords;
-        }
-      }
-      
-      addSampleData();
-      
       // Funções de utilidade
       function generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -1889,6 +1955,7 @@
       }
       
       function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
         toast.textContent = message;
         toast.className = 'toast';
         toast.classList.add(type);
@@ -1907,7 +1974,7 @@
       }
       
       function validatePatientForm() {
-        clearValidation(patientForm);
+        clearValidation(document.getElementById('patientForm'));
         let isValid = true;
         
         // Validar campos obrigatórios
@@ -1934,7 +2001,7 @@
       }
       
       function validateRecordForm() {
-        clearValidation(recordForm);
+        clearValidation(document.getElementById('recordForm'));
         let isValid = true;
         
         // Validar campos obrigatórios
@@ -1970,7 +2037,7 @@
         }
         
         // Validar campos de alta se checkbox estiver marcado
-        if (dischargePatient.checked) {
+        if (document.getElementById('dischargePatient').checked) {
           const dischargeRequiredFields = [
             { field: 'dischargeReason', message: 'Motivo da alta é obrigatório' },
             { field: 'dischargeSummary', message: 'Resumo da alta é obrigatório' }
@@ -1991,7 +2058,12 @@
       
       // Funções de renderização
       function renderPatientList() {
-        if (patients.length === 0) {
+        const patientListContainer = document.getElementById('patientListContainer');
+        const emptyPatientList = document.getElementById('emptyPatientList');
+        
+        console.log('Renderizando lista de pacientes:', window.appData.patients);
+        
+        if (window.appData.patients.length === 0) {
           patientListContainer.innerHTML = '';
           emptyPatientList.classList.remove('hidden');
           return;
@@ -1999,15 +2071,17 @@
         
         emptyPatientList.classList.add('hidden');
         
-        let filteredPatients = [...patients];
+        let filteredPatients = [...window.appData.patients];
         
         // Aplicar filtro de status
+        const statusFilter = document.getElementById('statusFilter');
         if (statusFilter.value !== 'all') {
           const isActive = statusFilter.value === 'active';
           filteredPatients = filteredPatients.filter(patient => patient.isActive === isActive);
         }
         
         // Aplicar filtro de busca
+        const searchPatients = document.getElementById('searchPatients');
         if (searchPatients.value.trim() !== '') {
           const searchTerm = searchPatients.value.trim().toLowerCase();
           filteredPatients = filteredPatients.filter(patient => 
@@ -2018,6 +2092,7 @@
         }
         
         // Aplicar ordenação
+        const sortPatients = document.getElementById('sortPatients');
         switch (sortPatients.value) {
           case 'nameAsc':
             filteredPatients.sort((a, b) => a.name.localeCompare(b.name));
@@ -2036,19 +2111,19 @@
         let html = '';
         
         filteredPatients.forEach(patient => {
-          const isSelected = patient.id === selectedPatientId;
+          const isSelected = patient.id === window.appData.selectedPatientId;
           const statusBadge = patient.isActive
             ? '<span class="badge badge-primary">Internado</span>'
             : '<span class="badge badge-success">Alta</span>';
           
           html += `
-            <div class="patient-card ${isSelected ? 'selected' : ''}" data-id="${patient.id}">
+            <div class="patient-card ${isSelected ? 'selected' : ''}" data-id="${patient.id}" onclick="selectPatient('${patient.id}')">
               <div class="patient-info">
                 <div class="patient-name">${patient.name} ${statusBadge}</div>
                 <div class="patient-record">Registro: ${patient.record} | Internação: ${formatDate(patient.admissionDate)}</div>
               </div>
               <div class="patient-actions">
-                <button class="btn btn-sm btn-info view-patient" data-id="${patient.id}">
+                <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); selectPatient('${patient.id}')">
                   <i class="fas fa-eye"></i>
                 </button>
               </div>
@@ -2057,29 +2132,15 @@
         });
         
         patientListContainer.innerHTML = html;
-        
-        // Adicionar eventos aos cards de pacientes
-        const patientCards = document.querySelectorAll('.patient-card');
-        patientCards.forEach(card => {
-          card.addEventListener('click', function() {
-            const patientId = this.dataset.id;
-            selectPatient(patientId);
-          });
-        });
-        
-        const viewButtons = document.querySelectorAll('.view-patient');
-        viewButtons.forEach(button => {
-          button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const patientId = this.dataset.id;
-            selectPatient(patientId);
-            switchTab('patientDetails');
-          });
-        });
       }
       
       function renderPatientDetails(patientId) {
-        const patient = patients.find(p => p.id === patientId);
+        const selectedPatientInfo = document.getElementById('selectedPatientInfo');
+        const patientActions = document.getElementById('patientActions');
+        
+        console.log('Renderizando detalhes do paciente:', patientId);
+        
+        const patient = window.appData.patients.find(p => p.id === patientId);
         
         if (!patient) {
           selectedPatientInfo.innerHTML = `
@@ -2132,6 +2193,7 @@
         patientActions.classList.remove('hidden');
         
         // Desabilitar botão de alta se o paciente já teve alta
+        const dischargePatientBtn = document.getElementById('dischargePatientBtn');
         if (!patient.isActive) {
           dischargePatientBtn.disabled = true;
           dischargePatientBtn.classList.add('opacity-50');
@@ -2146,10 +2208,12 @@
         const historyTableEl = document.getElementById('historyTable');
         const historyTableBodyEl = document.getElementById('historyTableBody');
         
-        const patient = patients.find(p => p.id === patientId);
+        console.log('Renderizando histórico do paciente:', patientId);
+        
+        const patient = window.appData.patients.find(p => p.id === patientId);
         if (!patient) return;
         
-        const patientRecords = records.filter(r => r.patientId === patientId);
+        const patientRecords = window.appData.records.filter(r => r.patientId === patientId);
         
         if (patientRecords.length === 0) {
           historyTimelineEl.innerHTML = `
@@ -2225,7 +2289,7 @@
                 ` : ''}
                 
                 <div class="text-right mt-2">
-                  <button class="btn btn-sm btn-info view-record" data-id="${record.id}">
+                  <button class="btn btn-sm btn-info" onclick="viewRecord('${record.id}')">
                     <i class="fas fa-eye"></i> Detalhes
                   </button>
                 </div>
@@ -2259,7 +2323,7 @@
               <td>${medications || '-'}</td>
               <td>${record.observations || '-'}</td>
               <td>
-                <button class="btn btn-sm btn-info view-record" data-id="${record.id}">
+                <button class="btn btn-sm btn-info" onclick="viewRecord('${record.id}')">
                   <i class="fas fa-eye"></i> Ver
                 </button>
               </td>
@@ -2268,15 +2332,6 @@
         });
         
         historyTableBodyEl.innerHTML = tableHtml;
-        
-        // Adicionar eventos aos botões de visualização de registro
-        const viewRecordButtons = document.querySelectorAll('.view-record');
-        viewRecordButtons.forEach(button => {
-          button.addEventListener('click', function() {
-            const recordId = this.dataset.id;
-            viewRecord(recordId);
-          });
-        });
         
         // Mostrar visualização selecionada
         const historyView = document.getElementById('historyView').value;
@@ -2290,10 +2345,12 @@
       }
       
       function renderStats(patientId) {
-        const patient = patients.find(p => p.id === patientId);
+        console.log('Renderizando estatísticas do paciente:', patientId);
+        
+        const patient = window.appData.patients.find(p => p.id === patientId);
         if (!patient) return;
         
-        const patientRecords = records.filter(r => r.patientId === patientId);
+        const patientRecords = window.appData.records.filter(r => r.patientId === patientId);
         
         // Informações básicas
         document.getElementById('statAdmissionDate').textContent = formatDate(patient.admissionDate);
@@ -2500,10 +2557,10 @@
       }
       
       function preparePatientExport(patientId) {
-        const patient = patients.find(p => p.id === patientId);
+        const patient = window.appData.patients.find(p => p.id === patientId);
         if (!patient) return;
         
-        const patientRecords = records.filter(r => r.patientId === patientId);
+        const patientRecords = window.appData.records.filter(r => r.patientId === patientId);
         
         const exportData = patientRecords.map(record => {
           // Transformar medicamentos em texto
@@ -2539,7 +2596,7 @@
       
       function prepareAllPatientsExport() {
         // Criar planilha de pacientes
-        const patientsData = patients.map(patient => {
+        const patientsData = window.appData.patients.map(patient => {
           return {
             'Registro': patient.record,
             'Prontuário': patient.medicalRecord,
@@ -2558,8 +2615,8 @@
         });
         
         // Criar planilha de registros diários
-        const recordsData = records.map(record => {
-          const patient = patients.find(p => p.id === record.patientId);
+        const recordsData = window.appData.records.map(record => {
+          const patient = window.appData.patients.find(p => p.id === record.patientId);
           const patientName = patient ? patient.name : '';
           const patientRecord = patient ? patient.record : '';
           const patientMedicalRecord = patient ? patient.medicalRecord : '';
@@ -2608,48 +2665,13 @@
       }
       
       // Manipulação de pacientes e registros
-      function selectPatient(patientId) {
-        selectedPatientId = patientId;
-        
-        // Atualizar visualização da lista
-        const patientCards = document.querySelectorAll('.patient-card');
-        patientCards.forEach(card => {
-          if (card.dataset.id === patientId) {
-            card.classList.add('selected');
-          } else {
-            card.classList.remove('selected');
-          }
-        });
-        
-        // Atualizar visualização de detalhes
-        renderPatientDetails(patientId);
-        
-        // Atualizar histórico
-        historyContainer.classList.remove('hidden');
-        historyEmptyState.classList.add('hidden');
-        renderHistoryTimeline(patientId);
-        
-        // Atualizar estatísticas
-        statsContainer.classList.remove('hidden');
-        statsEmptyState.classList.add('hidden');
-        renderStats(patientId);
-        
-        // Habilitar botão de registro diário
-        const patient = patients.find(p => p.id === patientId);
-        if (patient && patient.isActive) {
-          newDailyRecordBtn.classList.remove('opacity-50');
-          newDailyRecordBtn.disabled = false;
-        } else {
-          newDailyRecordBtn.classList.add('opacity-50');
-          newDailyRecordBtn.disabled = true;
-        }
-      }
-      
       function editPatient(patientId) {
-        const patient = patients.find(p => p.id === patientId);
+        console.log('Editando paciente:', patientId);
+        
+        const patient = window.appData.patients.find(p => p.id === patientId);
         if (!patient) return;
         
-        window.editingPatientId = patientId;
+        window.appData.editingPatientId = patientId;
         
         // Preencher formulário
         document.getElementById('patientName').value = patient.name;
@@ -2664,7 +2686,7 @@
         document.getElementById('patientNotes').value = patient.notes || '';
         
         // Limpar validação
-        clearValidation(patientForm);
+        clearValidation(document.getElementById('patientForm'));
         
         // Atualizar título do modal
         document.getElementById('patientModalTitle').textContent = 'Editar Paciente';
@@ -2675,6 +2697,7 @@
       
       function savePatient(event) {
         event.preventDefault();
+        console.log('Salvando paciente...');
         
         if (!validatePatientForm()) {
           showToast('Por favor, preencha todos os campos obrigatórios.', 'error');
@@ -2682,7 +2705,7 @@
         }
         
         const patient = {
-          id: window.editingPatientId || generateId(),
+          id: window.appData.editingPatientId || generateId(),
           name: document.getElementById('patientName').value,
           birthdate: document.getElementById('patientBirthdate').value,
           gender: document.getElementById('patientGender').value,
@@ -2697,24 +2720,26 @@
           isActive: true
         };
         
-        if (window.editingPatientId) {
+        if (window.appData.editingPatientId) {
           // Atualizar paciente existente
-          const index = patients.findIndex(p => p.id === window.editingPatientId);
+          const index = window.appData.patients.findIndex(p => p.id === window.appData.editingPatientId);
           if (index !== -1) {
             // Preservar dados de alta se existirem
-            if (patients[index].dischargeDate) {
-              patient.dischargeDate = patients[index].dischargeDate;
-              patient.isActive = patients[index].isActive;
+            if (window.appData.patients[index].dischargeDate) {
+              patient.dischargeDate = window.appData.patients[index].dischargeDate;
+              patient.isActive = window.appData.patients[index].isActive;
             }
             
-            patients[index] = patient;
+            window.appData.patients[index] = patient;
             showToast('Paciente atualizado com sucesso.', 'success');
           }
         } else {
           // Adicionar novo paciente
-          patients.push(patient);
+          window.appData.patients.push(patient);
           showToast('Paciente cadastrado com sucesso.', 'success');
         }
+        
+        console.log('Paciente salvo:', patient);
         
         // Fechar modal
         hideModal('patientModal');
@@ -2724,25 +2749,25 @@
         
         // Selecionar o paciente
         selectPatient(patient.id);
-        
-        // Trocar para a aba de detalhes
-        switchTab('patientDetails');
       }
       
       function deletePatient(patientId) {
-        const patient = patients.find(p => p.id === patientId);
+        console.log('Excluindo paciente:', patientId);
+        
+        const patient = window.appData.patients.find(p => p.id === patientId);
         if (!patient) return;
         
-        const patientRecords = records.filter(r => r.patientId === patientId);
+        const patientRecords = window.appData.records.filter(r => r.patientId === patientId);
         
         document.getElementById('confirmMessage').textContent = `Tem certeza que deseja excluir o paciente ${patient.name} e todos os seus ${patientRecords.length} registros?`;
         
+        const confirmYesBtn = document.getElementById('confirmYesBtn');
         confirmYesBtn.onclick = function() {
           // Remover registros do paciente
-          records = records.filter(r => r.patientId !== patientId);
+          window.appData.records = window.appData.records.filter(r => r.patientId !== patientId);
           
           // Remover paciente
-          patients = patients.filter(p => p.id !== patientId);
+          window.appData.patients = window.appData.patients.filter(p => p.id !== patientId);
           
           // Fechar modal
           hideModal('confirmModal');
@@ -2751,12 +2776,12 @@
           renderPatientList();
           
           // Limpar seleção
-          selectedPatientId = null;
+          window.appData.selectedPatientId = null;
           renderPatientDetails(null);
-          historyContainer.classList.add('hidden');
-          historyEmptyState.classList.remove('hidden');
-          statsContainer.classList.add('hidden');
-          statsEmptyState.classList.remove('hidden');
+          document.getElementById('historyContainer').classList.add('hidden');
+          document.getElementById('historyEmptyState').classList.remove('hidden');
+          document.getElementById('statsContainer').classList.add('hidden');
+          document.getElementById('statsEmptyState').classList.remove('hidden');
           
           // Trocar para a aba de lista de pacientes
           switchTab('patientList');
@@ -2769,12 +2794,14 @@
       }
       
       function dischargePatient(patientId) {
-        const patient = patients.find(p => p.id === patientId);
+        console.log('Iniciando alta de paciente:', patientId);
+        
+        const patient = window.appData.patients.find(p => p.id === patientId);
         if (!patient || !patient.isActive) return;
         
         // Criar formulário de alta
-        dailyRecordForm.classList.remove('hidden');
-        dailyRecordEmptyState.classList.add('hidden');
+        document.getElementById('dailyRecordForm').classList.remove('hidden');
+        document.getElementById('dailyRecordEmptyState').classList.add('hidden');
         
         // Preencher data e hora atual
         const now = new Date();
@@ -2782,8 +2809,8 @@
         document.getElementById('recordTime').value = now.toTimeString().slice(0, 5);
         
         // Ativar checkbox de alta
-        dischargePatient.checked = true;
-        dischargeSection.classList.remove('hidden');
+        document.getElementById('dischargePatient').checked = true;
+        document.getElementById('dischargeSection').classList.remove('hidden');
         
         // Trocar para a aba de registro diário
         switchTab('dailyRecord');
@@ -2791,68 +2818,9 @@
         showToast('Preencha os dados da alta do paciente.', 'info');
       }
       
-      function newDailyRecord() {
-        editingRecordId = null;
-        
-        // Limpar formulário
-        recordForm.reset();
-        
-        // Preencher data e hora atual
-        const now = new Date();
-        document.getElementById('recordDate').value = now.toISOString().slice(0, 10);
-        document.getElementById('recordTime').value = now.toTimeString().slice(0, 5);
-        
-        // Esconder seção de alta
-        dischargePatient.checked = false;
-        dischargeSection.classList.add('hidden');
-        
-        // Limpar lista de medicamentos
-        const medicationsList = document.getElementById('medicationsList');
-        medicationsList.innerHTML = `
-          <div class="medication-entry">
-            <div class="flex-container">
-              <div>
-                <div class="form-group">
-                  <label for="medicationName" class="form-label">Nome</label>
-                  <input type="text" id="medicationName" class="form-control medication-name">
-                </div>
-              </div>
-              <div>
-                <div class="form-group">
-                  <label for="medicationDose" class="form-label">Dose</label>
-                  <input type="text" id="medicationDose" class="form-control medication-dose">
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="medicationRoute" class="form-label">Via de Administração</label>
-              <select id="medicationRoute" class="form-control medication-route">
-                <option value="">Selecione</option>
-                <option value="Oral">Oral</option>
-                <option value="Intravenosa">Intravenosa</option>
-                <option value="Intramuscular">Intramuscular</option>
-                <option value="Subcutânea">Subcutânea</option>
-                <option value="Inalatória">Inalatória</option>
-                <option value="Tópica">Tópica</option>
-                <option value="Outras">Outras</option>
-              </select>
-            </div>
-          </div>
-        `;
-        
-        // Mostrar formulário
-        dailyRecordForm.classList.remove('hidden');
-        dailyRecordEmptyState.classList.add('hidden');
-        
-        // Limpar validação
-        clearValidation(recordForm);
-        
-        // Trocar para a aba de registro diário
-        switchTab('dailyRecord');
-      }
-      
       function saveRecord(event) {
         event.preventDefault();
+        console.log('Salvando registro diário...');
         
         if (!validateRecordForm()) {
           showToast('Por favor, preencha todos os campos obrigatórios.', 'error');
@@ -2878,8 +2846,8 @@
         });
         
         const record = {
-          id: editingRecordId || generateId(),
-          patientId: selectedPatientId,
+          id: window.appData.editingRecordId || generateId(),
+          patientId: window.appData.selectedPatientId,
           date: document.getElementById('recordDate').value,
           time: document.getElementById('recordTime').value,
           vitalSigns: {
@@ -2899,7 +2867,7 @@
         };
         
         // Se for alta, adicionar informações de alta
-        if (dischargePatient.checked) {
+        if (document.getElementById('dischargePatient').checked) {
           record.discharge = {
             reason: document.getElementById('dischargeReason').value,
             summary: document.getElementById('dischargeSummary').value,
@@ -2907,146 +2875,48 @@
           };
           
           // Atualizar paciente com data de alta
-          const patient = patients.find(p => p.id === selectedPatientId);
+          const patient = window.appData.patients.find(p => p.id === window.appData.selectedPatientId);
           if (patient) {
             patient.dischargeDate = record.date;
             patient.isActive = false;
           }
         }
         
-        if (editingRecordId) {
+        if (window.appData.editingRecordId) {
           // Atualizar registro existente
-          const index = records.findIndex(r => r.id === editingRecordId);
+          const index = window.appData.records.findIndex(r => r.id === window.appData.editingRecordId);
           if (index !== -1) {
-            records[index] = record;
+            window.appData.records[index] = record;
             showToast('Registro atualizado com sucesso.', 'success');
           }
         } else {
           // Adicionar novo registro
-          records.push(record);
+          window.appData.records.push(record);
           showToast('Registro adicionado com sucesso.', 'success');
         }
         
+        console.log('Registro salvo:', record);
+        
         // Limpar formulário
-        dailyRecordForm.classList.add('hidden');
-        dailyRecordEmptyState.classList.remove('hidden');
+        document.getElementById('dailyRecordForm').classList.add('hidden');
+        document.getElementById('dailyRecordEmptyState').classList.remove('hidden');
         
         // Atualizar histórico
-        renderHistoryTimeline(selectedPatientId);
+        renderHistoryTimeline(window.appData.selectedPatientId);
         
         // Atualizar detalhes do paciente
-        renderPatientDetails(selectedPatientId);
+        renderPatientDetails(window.appData.selectedPatientId);
         
         // Atualizar estatísticas
-        renderStats(selectedPatientId);
+        renderStats(window.appData.selectedPatientId);
         
         // Trocar para a aba de histórico
         switchTab('patientHistory');
       }
       
-      function viewRecord(recordId) {
-        const record = records.find(r => r.id === recordId);
-        if (!record) return;
-        
-        const patient = patients.find(p => p.id === record.patientId);
-        const patientName = patient ? patient.name : 'Paciente desconhecido';
-        
-        const medications = record.medications.map(med => 
-          `<li>${med.name} ${med.dose} (${med.route})</li>`
-        ).join('');
-        
-        const vitals = [];
-        if (record.vitalSigns.temperature) vitals.push(`<li>Temperatura: ${record.vitalSigns.temperature}°C</li>`);
-        if (record.vitalSigns.heartRate) vitals.push(`<li>Freq. Cardíaca: ${record.vitalSigns.heartRate} bpm</li>`);
-        if (record.vitalSigns.bloodPressure) vitals.push(`<li>Pressão Arterial: ${record.vitalSigns.bloodPressure} mmHg</li>`);
-        if (record.vitalSigns.respiratoryRate) vitals.push(`<li>Freq. Respiratória: ${record.vitalSigns.respiratoryRate} irpm</li>`);
-        if (record.vitalSigns.oxygenSaturation) vitals.push(`<li>Saturação O₂: ${record.vitalSigns.oxygenSaturation}%</li>`);
-        if (record.vitalSigns.painLevel) vitals.push(`<li>Nível de Dor: ${record.vitalSigns.painLevel}/10</li>`);
-        
-        const hasDischarge = record.discharge !== null;
-        
-        const recordDetails = document.getElementById('recordDetails');
-        recordDetails.innerHTML = `
-          <div class="record-patient-info">
-            <h3>${patientName}</h3>
-            <p>Data/Hora: ${formatDateTime(record.date, record.time)}</p>
-          </div>
-          
-          <div class="divider"></div>
-          
-          <div class="record-vital-signs">
-            <h4>Sinais Vitais</h4>
-            ${vitals.length > 0 ? `<ul>${vitals.join('')}</ul>` : '<p>Nenhum sinal vital registrado</p>'}
-          </div>
-          
-          <div class="record-medications">
-            <h4>Medicamentos</h4>
-            ${medications.length > 0 ? `<ul>${medications}</ul>` : '<p>Nenhum medicamento registrado</p>'}
-          </div>
-          
-          ${record.procedures ? `
-            <div class="record-procedures">
-              <h4>Procedimentos</h4>
-              <p>${record.procedures}</p>
-            </div>
-          ` : ''}
-          
-          ${record.observations ? `
-            <div class="record-observations">
-              <h4>Observações</h4>
-              <p>${record.observations}</p>
-            </div>
-          ` : ''}
-          
-          ${record.nutritionalStatus ? `
-            <div class="record-nutrition">
-              <h4>Estado Nutricional</h4>
-              <p>${record.nutritionalStatus}</p>
-            </div>
-          ` : ''}
-          
-          ${record.mobilityStatus ? `
-            <div class="record-mobility">
-              <h4>Mobilidade</h4>
-              <p>${record.mobilityStatus}</p>
-            </div>
-          ` : ''}
-          
-          ${hasDischarge ? `
-            <div class="divider"></div>
-            
-            <div class="record-discharge">
-              <h4>Informações de Alta</h4>
-              <p><strong>Motivo da Alta:</strong> ${record.discharge.reason}</p>
-              <p><strong>Resumo da Alta:</strong> ${record.discharge.summary}</p>
-              ${record.discharge.followUp ? `<p><strong>Instruções de Acompanhamento:</strong> ${record.discharge.followUp}</p>` : ''}
-            </div>
-          ` : ''}
-        `;
-        
-        showModal('viewRecordModal');
-      }
-      
-      // Funções auxiliares
-      function switchTab(tabId) {
-        tabs.forEach(tab => {
-          if (tab.dataset.tab === tabId) {
-            tab.classList.add('active');
-          } else {
-            tab.classList.remove('active');
-          }
-        });
-        
-        tabContents.forEach(content => {
-          if (content.id === tabId) {
-            content.classList.add('active');
-          } else {
-            content.classList.remove('active');
-          }
-        });
-      }
-      
       function addMedication() {
+        console.log('Adicionando campo de medicamento');
+        
         const medicationsList = document.getElementById('medicationsList');
         const newEntry = document.createElement('div');
         newEntry.className = 'medication-entry';
@@ -3092,86 +2962,173 @@
         });
       }
       
-      // Eventos
-      // Navegação por abas
-      tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-          const tabId = this.dataset.tab;
-          switchTab(tabId);
-        });
-      });
+      // Adicionar dados de exemplo para demonstração
+      function addSampleData() {
+        console.log('Adicionando dados de exemplo');
+        
+        if (window.appData.patients.length === 0) {
+          // Adicionar pacientes de exemplo
+          const samplePatients = [
+            {
+              id: generateId(),
+              name: 'João Silva',
+              birthdate: '1965-05-10',
+              gender: 'Masculino',
+              record: '12345',
+              medicalRecord: '987654',
+              contact: '(11) 98765-4321',
+              admissionDate: '2023-06-15',
+              diagnosis: 'Pneumonia comunitária',
+              allergies: 'Penicilina',
+              notes: 'Paciente com comorbidade de hipertensão e diabetes.',
+              dischargeDate: null,
+              isActive: true
+            },
+            {
+              id: generateId(),
+              name: 'Maria Oliveira',
+              birthdate: '1978-11-22',
+              gender: 'Feminino',
+              record: '23456',
+              medicalRecord: '876543',
+              contact: '(11) 91234-5678',
+              admissionDate: '2023-06-20',
+              diagnosis: 'Insuficiência cardíaca descompensada',
+              allergies: 'Sulfas',
+              notes: 'Paciente apresenta edema em membros inferiores.',
+              dischargeDate: null,
+              isActive: true
+            }
+          ];
+          
+          window.appData.patients = samplePatients;
+          
+          // Adicionar registros de exemplo
+          const sampleRecords = [
+            {
+              id: generateId(),
+              patientId: window.appData.patients[0].id,
+              date: '2023-06-15',
+              time: '14:30',
+              vitalSigns: {
+                temperature: 38.5,
+                heartRate: 95,
+                bloodPressure: '130/85',
+                respiratoryRate: 20,
+                oxygenSaturation: 93,
+                painLevel: 3
+              },
+              medications: [
+                {
+                  name: 'Ceftriaxona',
+                  dose: '1g',
+                  route: 'Intravenosa'
+                },
+                {
+                  name: 'Dipirona',
+                  dose: '1g',
+                  route: 'Oral'
+                }
+              ],
+              procedures: 'Coleta de hemoculturas',
+              observations: 'Paciente relata melhora da dispneia após medicação.',
+              nutritionalStatus: 'Adequado',
+              mobilityStatus: 'Deambula com auxílio',
+              discharge: null
+            },
+            {
+              id: generateId(),
+              patientId: window.appData.patients[0].id,
+              date: '2023-06-16',
+              time: '09:00',
+              vitalSigns: {
+                temperature: 37.2,
+                heartRate: 88,
+                bloodPressure: '125/80',
+                respiratoryRate: 18,
+                oxygenSaturation: 95,
+                painLevel: 2
+              },
+              medications: [
+                {
+                  name: 'Ceftriaxona',
+                  dose: '1g',
+                  route: 'Intravenosa'
+                }
+              ],
+              procedures: 'Raio-X de tórax',
+              observations: 'Melhora dos sintomas respiratórios.',
+              nutritionalStatus: 'Adequado',
+              mobilityStatus: 'Deambula sem auxílio',
+              discharge: null
+            },
+            {
+              id: generateId(),
+              patientId: window.appData.patients[1].id,
+              date: '2023-06-20',
+              time: '10:15',
+              vitalSigns: {
+                temperature: 36.8,
+                heartRate: 102,
+                bloodPressure: '160/95',
+                respiratoryRate: 22,
+                oxygenSaturation: 91,
+                painLevel: 4
+              },
+              medications: [
+                {
+                  name: 'Furosemida',
+                  dose: '40mg',
+                  route: 'Intravenosa'
+                },
+                {
+                  name: 'Enalapril',
+                  dose: '10mg',
+                  route: 'Oral'
+                }
+              ],
+              procedures: 'Aferição de peso e diurese',
+              observations: 'Paciente com dispneia aos pequenos esforços e edema +2/+4 em MMII.',
+              nutritionalStatus: 'Inapetente',
+              mobilityStatus: 'Restrito ao leito',
+              discharge: null
+            }
+          ];
+          
+          window.appData.records = sampleRecords;
+        }
+      }
       
+      // Adicionar dados de exemplo
+      addSampleData();
+      
+      // Configurar eventos
       // Formulário de paciente
-      patientForm.addEventListener('submit', savePatient);
+      document.getElementById('patientForm').addEventListener('submit', savePatient);
       
-      // Eventos de pacientes
-      editPatientBtn.addEventListener('click', function() {
-        editPatient(selectedPatientId);
-      });
+      // Formulário de registro
+      document.getElementById('recordForm').addEventListener('submit', saveRecord);
       
-      deletePatientBtn.addEventListener('click', function() {
-        deletePatient(selectedPatientId);
-      });
-      
-      dischargePatientBtn.addEventListener('click', function() {
-        dischargePatient(selectedPatientId);
-      });
-      
-      // Eventos de registro diário
-      newDailyRecordBtn.addEventListener('click', newDailyRecord);
-      addMedicationBtn.addEventListener('click', addMedication);
-      recordForm.addEventListener('submit', saveRecord);
-      cancelRecordBtn.addEventListener('click', function() {
-        dailyRecordForm.classList.add('hidden');
-        dailyRecordEmptyState.classList.remove('hidden');
-        switchTab('patientDetails');
-      });
-      
-      // Eventos de exportação
-      exportAllBtn.addEventListener('click', function() {
-        prepareAllPatientsExport();
-        showToast('Exportação concluída com sucesso.', 'success');
-      });
-      
-      exportPatientBtn.addEventListener('click', function() {
-        if (selectedPatientId) {
-          preparePatientExport(selectedPatientId);
-          showToast('Exportação concluída com sucesso.', 'success');
+      // Evento de checkbox de alta
+      document.getElementById('dischargePatient').addEventListener('change', function() {
+        if (this.checked) {
+          document.getElementById('dischargeSection').classList.remove('hidden');
+        } else {
+          document.getElementById('dischargeSection').classList.add('hidden');
         }
       });
       
-      // Eventos de filtros e busca
-      searchPatients.addEventListener('input', function() {
-        renderPatientList();
+      // Evento de cancelamento de registro
+      document.getElementById('cancelRecordBtn').addEventListener('click', function() {
+        document.getElementById('dailyRecordForm').classList.add('hidden');
+        document.getElementById('dailyRecordEmptyState').classList.remove('hidden');
+        switchTab('patientDetails');
       });
       
-      statusFilter.addEventListener('change', function() {
-        renderPatientList();
-      });
+      // Painél nível de dor
+      const painLevel = document.getElementById('painLevel');
+      const painLevelValue = document.getElementById('painLevelValue');
       
-      sortPatients.addEventListener('change', function() {
-        renderPatientList();
-      });
-      
-      // Eventos do histórico
-      document.getElementById('historyDateStart').addEventListener('change', function() {
-        renderHistoryTimeline(selectedPatientId);
-      });
-      
-      document.getElementById('historyDateEnd').addEventListener('change', function() {
-        renderHistoryTimeline(selectedPatientId);
-      });
-      
-      document.getElementById('historyView').addEventListener('change', function() {
-        renderHistoryTimeline(selectedPatientId);
-      });
-      
-      // Eventos de estatísticas
-      document.getElementById('vitalSignSelect').addEventListener('change', function() {
-        renderVitalSignsChart(records.filter(r => r.patientId === selectedPatientId));
-      });
-      
-      // Evento de nível de dor
       painLevel.addEventListener('input', function() {
         const value = this.value;
         let description = '';
@@ -3205,17 +3162,63 @@
         painLevelValue.textContent = description;
       });
       
-      // Evento de checkbox de alta
-      dischargePatient.addEventListener('change', function() {
-        if (this.checked) {
-          dischargeSection.classList.remove('hidden');
-        } else {
-          dischargeSection.classList.add('hidden');
+      // Adicionar medicamento
+      document.getElementById('addMedicationBtn').addEventListener('click', addMedication);
+      
+      // Botões de ações do paciente
+      document.getElementById('editPatientBtn').addEventListener('click', function() {
+        editPatient(window.appData.selectedPatientId);
+      });
+      
+      document.getElementById('deletePatientBtn').addEventListener('click', function() {
+        deletePatient(window.appData.selectedPatientId);
+      });
+      
+      document.getElementById('dischargePatientBtn').addEventListener('click', function() {
+        dischargePatient(window.appData.selectedPatientId);
+      });
+      
+      // Eventos de filtros e busca
+      document.getElementById('searchPatients').addEventListener('input', renderPatientList);
+      document.getElementById('statusFilter').addEventListener('change', renderPatientList);
+      document.getElementById('sortPatients').addEventListener('change', renderPatientList);
+      
+      // Eventos do histórico
+      document.getElementById('historyDateStart').addEventListener('change', function() {
+        renderHistoryTimeline(window.appData.selectedPatientId);
+      });
+      
+      document.getElementById('historyDateEnd').addEventListener('change', function() {
+        renderHistoryTimeline(window.appData.selectedPatientId);
+      });
+      
+      document.getElementById('historyView').addEventListener('change', function() {
+        renderHistoryTimeline(window.appData.selectedPatientId);
+      });
+      
+      // Eventos de estatísticas
+      document.getElementById('vitalSignSelect').addEventListener('change', function() {
+        renderVitalSignsChart(window.appData.records.filter(r => r.patientId === window.appData.selectedPatientId));
+      });
+      
+      // Eventos de exportação
+      document.getElementById('exportAllBtn').addEventListener('click', function() {
+        prepareAllPatientsExport();
+        showToast('Exportação concluída com sucesso.', 'success');
+      });
+      
+      document.getElementById('exportPatientBtn').addEventListener('click', function() {
+        if (window.appData.selectedPatientId) {
+          preparePatientExport(window.appData.selectedPatientId);
+          showToast('Exportação concluída com sucesso.', 'success');
         }
       });
       
       // Inicialização
       renderPatientList();
+      
+      // Expor funções no escopo global via window.appFunctions
+      window.viewRecord = viewRecord;
     });
   </script>
 </body>
