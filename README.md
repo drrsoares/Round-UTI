@@ -522,61 +522,50 @@
       animation: slideIn 0.3s ease forwards;
     }
     
-    /* Modal */
-    .modal-overlay {
+    /* Modal - NOVO SISTEMA DE MODAL */
+    .modal {
+      display: none;
       position: fixed;
-      top: 0;
+      z-index: 9999;
       left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-    
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.6);
+      padding: 20px;
+      overflow-y: auto;
     }
     
     .modal-content {
       background-color: var(--card-bg);
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      max-width: 90%;
-      max-height: 90%;
-      overflow-y: auto;
-      width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      width: 90%;
+      max-width: 600px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 8px var(--shadow-color);
       position: relative;
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
     }
     
-    .modal-overlay.active .modal-content {
-      transform: scale(1);
+    .modal-header {
+      margin-bottom: 20px;
     }
     
     .modal-close {
       position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      font-size: 1.5rem;
+      right: 15px;
+      top: 15px;
+      font-size: 24px;
       cursor: pointer;
+      color: var(--text-color);
       background: none;
       border: none;
-      color: var(--text-color);
+      width: 30px;
+      height: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 30px;
-      height: 30px;
       border-radius: 50%;
-      transition: background-color 0.2s ease;
     }
     
     .modal-close:hover {
@@ -1054,7 +1043,7 @@
     <div class="page-header">
       <h1>Sistema de Acompanhamento de Pacientes</h1>
       <div class="btn-group">
-        <button id="newPatientBtn" class="btn btn-primary">
+        <button id="newPatientBtn" class="btn btn-primary" onclick="showModal('patientModal')">
           <i class="fas fa-user-plus"></i> Novo Paciente
         </button>
         <button id="exportAllBtn" class="btn btn-success">
@@ -1109,7 +1098,7 @@
           <div class="empty-state" id="emptyPatientList">
             <i class="fas fa-user-injured"></i>
             <div class="empty-state-text">Nenhum paciente cadastrado</div>
-            <button class="btn btn-primary" id="emptyStateNewPatient">
+            <button class="btn btn-primary" onclick="showModal('patientModal')">
               <i class="fas fa-user-plus"></i> Adicionar paciente
             </button>
           </div>
@@ -1488,11 +1477,14 @@
       </div>
     </div>
     
+    <!-- MODAIS - NOVA IMPLEMENTAÇÃO -->
     <!-- Modal de Novo/Editar Paciente -->
-    <div id="patientModal" class="modal-overlay">
+    <div id="patientModal" class="modal">
       <div class="modal-content">
-        <button class="modal-close" id="closePatientModal"><i class="fas fa-times"></i></button>
-        <h2 id="patientModalTitle">Novo Paciente</h2>
+        <span class="modal-close" onclick="hideModal('patientModal')">&times;</span>
+        <div class="modal-header">
+          <h2 id="patientModalTitle">Novo Paciente</h2>
+        </div>
         <form id="patientForm">
           <div class="form-group">
             <label for="patientName" class="form-label required-field">Nome Completo</label>
@@ -1570,7 +1562,7 @@
             <button type="submit" id="savePatientBtn" class="btn btn-primary">
               <i class="fas fa-save"></i> Salvar
             </button>
-            <button type="button" id="cancelPatientBtn" class="btn btn-secondary">
+            <button type="button" onclick="hideModal('patientModal')" class="btn btn-secondary">
               <i class="fas fa-times"></i> Cancelar
             </button>
           </div>
@@ -1579,28 +1571,32 @@
     </div>
     
     <!-- Modal de Confirmação -->
-    <div id="confirmModal" class="modal-overlay">
+    <div id="confirmModal" class="modal">
       <div class="modal-content">
-        <button class="modal-close" id="closeConfirmModal"><i class="fas fa-times"></i></button>
-        <h2>Confirmação</h2>
+        <span class="modal-close" onclick="hideModal('confirmModal')">&times;</span>
+        <div class="modal-header">
+          <h2>Confirmação</h2>
+        </div>
         <p id="confirmMessage">Tem certeza que deseja realizar esta ação?</p>
         <div class="btn-group">
           <button id="confirmYesBtn" class="btn btn-danger">Sim, confirmar</button>
-          <button id="confirmNoBtn" class="btn btn-secondary">Cancelar</button>
+          <button onclick="hideModal('confirmModal')" class="btn btn-secondary">Cancelar</button>
         </div>
       </div>
     </div>
     
     <!-- Modal de Visualização do Registro -->
-    <div id="viewRecordModal" class="modal-overlay">
+    <div id="viewRecordModal" class="modal">
       <div class="modal-content">
-        <button class="modal-close" id="closeViewRecordModal"><i class="fas fa-times"></i></button>
-        <h2>Detalhes do Registro</h2>
+        <span class="modal-close" onclick="hideModal('viewRecordModal')">&times;</span>
+        <div class="modal-header">
+          <h2>Detalhes do Registro</h2>
+        </div>
         <div id="recordDetails">
           <!-- Detalhes do registro serão carregados aqui -->
         </div>
         <div class="btn-group">
-          <button id="closeViewRecordBtn" class="btn btn-secondary">Fechar</button>
+          <button onclick="hideModal('viewRecordModal')" class="btn btn-secondary">Fechar</button>
         </div>
       </div>
     </div>
@@ -1610,6 +1606,36 @@
   </div>
 
   <script>
+    // Função para mostrar modal - NOVA IMPLEMENTAÇÃO
+    function showModal(modalId) {
+      document.getElementById(modalId).style.display = 'block';
+      
+      // Se for o modal de paciente e for para novo paciente, prepara-o
+      if (modalId === 'patientModal') {
+        prepareNewPatient();
+      }
+    }
+    
+    // Função para esconder modal - NOVA IMPLEMENTAÇÃO
+    function hideModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+    
+    // Função para preparar o formulário de novo paciente
+    function prepareNewPatient() {
+      // Limpar formulário
+      document.getElementById('patientForm').reset();
+      
+      // Preencher a data de internação com a data atual
+      document.getElementById('patientAdmissionDate').value = new Date().toISOString().slice(0, 10);
+      
+      // Atualizar título do modal
+      document.getElementById('patientModalTitle').textContent = 'Novo Paciente';
+      
+      // Limpar ID de edição
+      window.editingPatientId = null;
+    }
+    
     document.addEventListener('DOMContentLoaded', function() {
       // Verificar o esquema de cores preferido
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -1627,7 +1653,7 @@
       let patients = [];
       let records = [];
       let selectedPatientId = null;
-      let editingPatientId = null;
+      window.editingPatientId = null;
       let editingRecordId = null;
       
       // Elementos do DOM
@@ -1643,9 +1669,6 @@
       const historyEmptyState = document.getElementById('historyEmptyState');
       const statsContainer = document.getElementById('statsContainer');
       const statsEmptyState = document.getElementById('statsEmptyState');
-      const patientModal = document.getElementById('patientModal');
-      const confirmModal = document.getElementById('confirmModal');
-      const viewRecordModal = document.getElementById('viewRecordModal');
       const toast = document.getElementById('toast');
       const painLevel = document.getElementById('painLevel');
       const painLevelValue = document.getElementById('painLevelValue');
@@ -1656,8 +1679,6 @@
       const dischargeSection = document.getElementById('dischargeSection');
       
       // Buttons
-      const newPatientBtn = document.getElementById('newPatientBtn');
-      const emptyStateNewPatient = document.getElementById('emptyStateNewPatient');
       const editPatientBtn = document.getElementById('editPatientBtn');
       const newDailyRecordBtn = document.getElementById('newDailyRecordBtn');
       const dischargePatientBtn = document.getElementById('dischargePatientBtn');
@@ -1665,14 +1686,7 @@
       const addMedicationBtn = document.getElementById('addMedicationBtn');
       const saveRecordBtn = document.getElementById('saveRecordBtn');
       const cancelRecordBtn = document.getElementById('cancelRecordBtn');
-      const savePatientBtn = document.getElementById('savePatientBtn');
-      const cancelPatientBtn = document.getElementById('cancelPatientBtn');
-      const closePatientModal = document.getElementById('closePatientModal');
-      const closeConfirmModal = document.getElementById('closeConfirmModal');
       const confirmYesBtn = document.getElementById('confirmYesBtn');
-      const confirmNoBtn = document.getElementById('confirmNoBtn');
-      const closeViewRecordModal = document.getElementById('closeViewRecordModal');
-      const closeViewRecordBtn = document.getElementById('closeViewRecordBtn');
       const exportAllBtn = document.getElementById('exportAllBtn');
       const exportPatientBtn = document.getElementById('exportPatientBtn');
       
@@ -1880,14 +1894,6 @@
         setTimeout(() => {
           toast.classList.remove('show');
         }, 3000);
-      }
-      
-      function openModal(modal) {
-        modal.classList.add('active');
-      }
-      
-      function closeModal(modal) {
-        modal.classList.remove('active');
       }
       
       function clearValidation(form) {
@@ -2636,30 +2642,11 @@
         }
       }
       
-      function newPatient() {
-        editingPatientId = null;
-        
-        // Limpar formulário
-        patientForm.reset();
-        
-        // Preencher a data de internação com a data atual
-        document.getElementById('patientAdmissionDate').value = new Date().toISOString().slice(0, 10);
-        
-        // Limpar validação
-        clearValidation(patientForm);
-        
-        // Atualizar título do modal
-        document.getElementById('patientModalTitle').textContent = 'Novo Paciente';
-        
-        // Abrir modal
-        openModal(patientModal);
-      }
-      
       function editPatient(patientId) {
         const patient = patients.find(p => p.id === patientId);
         if (!patient) return;
         
-        editingPatientId = patientId;
+        window.editingPatientId = patientId;
         
         // Preencher formulário
         document.getElementById('patientName').value = patient.name;
@@ -2680,7 +2667,7 @@
         document.getElementById('patientModalTitle').textContent = 'Editar Paciente';
         
         // Abrir modal
-        openModal(patientModal);
+        showModal('patientModal');
       }
       
       function savePatient(event) {
@@ -2692,7 +2679,7 @@
         }
         
         const patient = {
-          id: editingPatientId || generateId(),
+          id: window.editingPatientId || generateId(),
           name: document.getElementById('patientName').value,
           birthdate: document.getElementById('patientBirthdate').value,
           gender: document.getElementById('patientGender').value,
@@ -2707,9 +2694,9 @@
           isActive: true
         };
         
-        if (editingPatientId) {
+        if (window.editingPatientId) {
           // Atualizar paciente existente
-          const index = patients.findIndex(p => p.id === editingPatientId);
+          const index = patients.findIndex(p => p.id === window.editingPatientId);
           if (index !== -1) {
             // Preservar dados de alta se existirem
             if (patients[index].dischargeDate) {
@@ -2727,7 +2714,7 @@
         }
         
         // Fechar modal
-        closeModal(patientModal);
+        hideModal('patientModal');
         
         // Atualizar lista de pacientes
         renderPatientList();
@@ -2755,7 +2742,7 @@
           patients = patients.filter(p => p.id !== patientId);
           
           // Fechar modal
-          closeModal(confirmModal);
+          hideModal('confirmModal');
           
           // Atualizar lista de pacientes
           renderPatientList();
@@ -2775,7 +2762,7 @@
         };
         
         // Abrir modal de confirmação
-        openModal(confirmModal);
+        showModal('confirmModal');
       }
       
       function dischargePatient(patientId) {
@@ -3034,7 +3021,7 @@
           ` : ''}
         `;
         
-        openModal(viewRecordModal);
+        showModal('viewRecordModal');
       }
       
       // Funções auxiliares
@@ -3111,24 +3098,20 @@
         });
       });
       
+      // Formulário de paciente
+      patientForm.addEventListener('submit', savePatient);
+      
       // Eventos de pacientes
-      newPatientBtn.addEventListener('click', newPatient);
-      emptyStateNewPatient.addEventListener('click', newPatient);
       editPatientBtn.addEventListener('click', function() {
         editPatient(selectedPatientId);
       });
+      
       deletePatientBtn.addEventListener('click', function() {
         deletePatient(selectedPatientId);
       });
+      
       dischargePatientBtn.addEventListener('click', function() {
         dischargePatient(selectedPatientId);
-      });
-      patientForm.addEventListener('submit', savePatient);
-      closePatientModal.addEventListener('click', function() {
-        closeModal(patientModal);
-      });
-      cancelPatientBtn.addEventListener('click', function() {
-        closeModal(patientModal);
       });
       
       // Eventos de registro diário
@@ -3139,22 +3122,6 @@
         dailyRecordForm.classList.add('hidden');
         dailyRecordEmptyState.classList.remove('hidden');
         switchTab('patientDetails');
-      });
-      
-      // Eventos de modal de confirmação
-      closeConfirmModal.addEventListener('click', function() {
-        closeModal(confirmModal);
-      });
-      confirmNoBtn.addEventListener('click', function() {
-        closeModal(confirmModal);
-      });
-      
-      // Eventos de modal de visualização de registro
-      closeViewRecordModal.addEventListener('click', function() {
-        closeModal(viewRecordModal);
-      });
-      closeViewRecordBtn.addEventListener('click', function() {
-        closeModal(viewRecordModal);
       });
       
       // Eventos de exportação
