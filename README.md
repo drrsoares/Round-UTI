@@ -1037,6 +1037,39 @@
       }
     }
   </style>
+  <script>
+    // Função para mostrar modal - DEFINIDA GLOBALMENTE
+    function showModal(modalId) {
+      console.log('Abrindo modal: ' + modalId);
+      document.getElementById(modalId).style.display = 'block';
+      
+      // Se for o modal de paciente e for para novo paciente, prepara-o
+      if (modalId === 'patientModal') {
+        prepareNewPatient();
+      }
+    }
+    
+    // Função para esconder modal - DEFINIDA GLOBALMENTE
+    function hideModal(modalId) {
+      console.log('Fechando modal: ' + modalId);
+      document.getElementById(modalId).style.display = 'none';
+    }
+    
+    // Função para preparar o formulário de novo paciente
+    function prepareNewPatient() {
+      // Limpar formulário
+      document.getElementById('patientForm').reset();
+      
+      // Preencher a data de internação com a data atual
+      document.getElementById('patientAdmissionDate').value = new Date().toISOString().slice(0, 10);
+      
+      // Atualizar título do modal
+      document.getElementById('patientModalTitle').textContent = 'Novo Paciente';
+      
+      // Limpar ID de edição
+      window.editingPatientId = null;
+    }
+  </script>
 </head>
 <body>
   <div class="container">
@@ -1606,36 +1639,6 @@
   </div>
 
   <script>
-    // Função para mostrar modal - NOVA IMPLEMENTAÇÃO
-    function showModal(modalId) {
-      document.getElementById(modalId).style.display = 'block';
-      
-      // Se for o modal de paciente e for para novo paciente, prepara-o
-      if (modalId === 'patientModal') {
-        prepareNewPatient();
-      }
-    }
-    
-    // Função para esconder modal - NOVA IMPLEMENTAÇÃO
-    function hideModal(modalId) {
-      document.getElementById(modalId).style.display = 'none';
-    }
-    
-    // Função para preparar o formulário de novo paciente
-    function prepareNewPatient() {
-      // Limpar formulário
-      document.getElementById('patientForm').reset();
-      
-      // Preencher a data de internação com a data atual
-      document.getElementById('patientAdmissionDate').value = new Date().toISOString().slice(0, 10);
-      
-      // Atualizar título do modal
-      document.getElementById('patientModalTitle').textContent = 'Novo Paciente';
-      
-      // Limpar ID de edição
-      window.editingPatientId = null;
-    }
-    
     document.addEventListener('DOMContentLoaded', function() {
       // Verificar o esquema de cores preferido
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
