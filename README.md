@@ -37,6 +37,9 @@
       }
     }
 
+
+
+
     /* Light mode variables */
     @media (prefers-color-scheme: light) {
       :root {
@@ -53,6 +56,9 @@
       }
     }
 
+
+
+
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--bg-color);
@@ -64,11 +70,17 @@
       min-height: 100vh;
     }
 
+
+
+
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 1rem;
     }
+
+
+
 
     .card {
       background-color: var(--card-bg);
@@ -80,9 +92,15 @@
       transition: box-shadow 0.3s ease, transform 0.2s ease;
     }
 
+
+
+
     .card:hover {
       box-shadow: 0 6px 12px var(--shadow-color);
     }
+
+
+
 
     h1, h2, h3, h4, h5, h6 {
       color: var(--text-color);
@@ -106,6 +124,9 @@
       font-size: 1.3rem;
     }
 
+
+
+
     .btn {
       padding: 0.5rem 1rem;
       border-radius: 0.25rem;
@@ -125,14 +146,23 @@
       box-shadow: 0 1px 2px var(--shadow-color);
     }
 
+
+
+
     .btn-primary {
       background-color: var(--primary-color);
       color: white;
     }
 
+
+
+
     .btn-primary:hover {
       background-color: #4a49b9;
     }
+
+
+
 
     .btn-secondary {
       background-color: #6c757d;
@@ -143,10 +173,16 @@
       background-color: #5a6268;
     }
 
+
+
+
     .btn-danger {
       background-color: var(--danger-color);
       color: white;
     }
+
+
+
 
     .btn-danger:hover {
       background-color: #c82333;
@@ -183,11 +219,17 @@
       margin-right: 0.5rem;
     }
 
+
+
+
     .btn-sm {
       padding: 0.25rem 0.5rem;
       font-size: 0.875rem;
       min-height: 2rem;
     }
+
+
+
 
     .btn-group {
       display: flex;
@@ -196,9 +238,15 @@
       flex-wrap: wrap;
     }
 
+
+
+
     .form-group {
       margin-bottom: 1.25rem;
     }
+
+
+
 
     .form-control {
       width: 100%;
@@ -211,11 +259,17 @@
       color: var(--text-color);
     }
 
+
+
+
     .form-control:focus {
       border-color: var(--primary-color);
       outline: none;
       box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.25);
     }
+
+
+
 
     .form-label {
       display: block;
@@ -223,9 +277,15 @@
       font-weight: 500;
     }
 
+
+
+
     .invalid {
       border-color: var(--danger-color) !important;
     }
+
+
+
 
     .validation-message {
       color: var(--danger-color);
@@ -238,6 +298,9 @@
       display: block;
     }
 
+
+
+
     .alert {
       padding: 1rem;
       border-radius: 0.25rem;
@@ -245,11 +308,17 @@
       border-left: 4px solid transparent;
     }
 
+
+
+
     .alert-warning {
       background-color: rgba(255, 193, 7, 0.2);
       border-left-color: var(--warning-color);
       color: #856404;
     }
+
+
+
 
     .alert-danger {
       background-color: rgba(220, 53, 69, 0.2);
@@ -269,9 +338,15 @@
       color: #0c5460;
     }
 
+
+
+
     .hidden {
       display: none !important;
     }
+
+
+
 
     .flex-container {
       display: flex;
@@ -279,9 +354,15 @@
       margin-bottom: 1rem;
     }
 
+
+
+
     .flex-container > div {
       flex: 1;
     }
+
+
+
 
     .daily-entry {
       border: 1px solid var(--border-color);
@@ -297,6 +378,9 @@
       box-shadow: 0 4px 8px var(--shadow-color);
     }
 
+
+
+
     .status-indicator {
       display: inline-block;
       width: 12px;
@@ -305,22 +389,37 @@
       margin-left: 0.5rem;
     }
 
+
+
+
     .status-ok {
       background-color: var(--success-color);
     }
+
+
+
 
     .status-warning {
       background-color: var(--warning-color);
     }
 
+
+
+
     .status-danger {
       background-color: var(--danger-color);
     }
+
+
+
 
     .status-container {
       display: flex;
       align-items: center;
     }
+
+
+
 
     /* Tabs */
     .tabs {
@@ -329,6 +428,9 @@
       border-bottom: 1px solid var(--border-color);
       margin-bottom: 1.5rem;
     }
+
+
+
 
     .tab {
       padding: 0.75rem 1.25rem;
@@ -339,6 +441,9 @@
       user-select: none;
     }
 
+
+
+
     .tab.active {
       color: var(--primary-color);
       border-bottom: 2px solid var(--primary-color);
@@ -348,14 +453,23 @@
       background-color: var(--hover-bg);
     }
 
+
+
+
     .tab-content {
       display: none;
       animation: fadeIn 0.3s ease forwards;
     }
 
+
+
+
     .tab-content.active {
       display: block;
     }
+
+
+
 
     .checkbox-container {
       display: flex;
@@ -363,15 +477,24 @@
       margin-bottom: 1rem;
     }
 
+
+
+
     .checkbox-container input[type="checkbox"] {
       width: auto;
       margin-right: 0.5rem;
     }
 
+
+
+
     .checkbox-container label {
       display: inline;
       font-weight: normal;
     }
+
+
+
 
     /* Loading Spinner */
     .spinner {
@@ -384,9 +507,15 @@
       margin: 2rem auto;
     }
 
+
+
+
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+
+
 
     /* Toast Notification */
     .toast {
@@ -406,6 +535,9 @@
       transform: translateY(-10px);
     }
 
+
+
+
     .toast.show {
       opacity: 1;
       transform: translateY(0);
@@ -422,6 +554,9 @@
     .toast.warning {
       border-left-color: var(--warning-color);
     }
+
+
+
 
     @media (max-width: 768px) {
       .flex-container {
@@ -458,6 +593,9 @@
       }
     }
 
+
+
+
     /* Estilos para tabela de resumo */
     .table-container {
       overflow-x: auto;
@@ -466,17 +604,26 @@
       border: 1px solid var(--border-color);
     }
 
+
+
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin: 0;
     }
 
+
+
+
     th, td {
       padding: 0.75rem;
       text-align: left;
       border-bottom: 1px solid var(--border-color);
     }
+
+
+
 
     th {
       background-color: var(--table-header-bg);
@@ -485,6 +632,9 @@
       top: 0;
     }
 
+
+
+
     tr:hover {
       background-color: var(--table-hover);
     }
@@ -492,6 +642,9 @@
     tr:last-child td {
       border-bottom: none;
     }
+
+
+
 
     /* Fixar sticky tab bar no mobile */
     @media (max-width: 768px) {
@@ -504,11 +657,17 @@
       }
     }
 
+
+
+
     /* Animações */
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
+
+
+
 
     .fade-in {
       animation: fadeIn 0.3s ease forwards;
@@ -1048,11 +1207,20 @@
       editingRecordId: null
     };
     
-    // CORREÇÃO: Função switchTab aprimorada e mais direta
+    // Função switchTab reescrita com implementação robusta
     function switchTab(tabId) {
       console.log('Trocando para aba: ' + tabId);
       
-      // Atualizar as classes das abas - simplificado e mais direto
+      // Verificação de segurança, se o tabId existe
+      const targetTab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+      const targetContent = document.getElementById(tabId);
+      
+      if (!targetTab || !targetContent) {
+        console.error(`Erro: Aba "${tabId}" não encontrada no DOM`);
+        return;
+      }
+      
+      // Atualizar as classes das abas de forma consistente
       document.querySelectorAll('.tab').forEach(function(tab) {
         if (tab.getAttribute('data-tab') === tabId) {
           tab.classList.add('active');
@@ -1061,7 +1229,7 @@
         }
       });
       
-      // Atualizar as classes dos conteúdos das abas - simplificado e mais direto
+      // Atualizar as classes dos conteúdos das abas de forma consistente
       document.querySelectorAll('.tab-content').forEach(function(content) {
         if (content.id === tabId) {
           content.classList.add('active');
@@ -1070,9 +1238,16 @@
         }
       });
       
-      // CORREÇÃO: Log adicional para debug
-      console.log('Aba ativa agora: ' + document.querySelector('.tab.active').getAttribute('data-tab'));
-      console.log('Conteúdo ativo agora: ' + document.querySelector('.tab-content.active').id);
+      // Verificar se a tab foi realmente ativada
+      const activeTab = document.querySelector('.tab.active');
+      const activeContent = document.querySelector('.tab-content.active');
+      
+      if (activeTab && activeContent) {
+        console.log('Sucesso: Aba ativa agora: ' + activeTab.getAttribute('data-tab'));
+        console.log('Sucesso: Conteúdo ativo agora: ' + activeContent.id);
+      } else {
+        console.error('Erro ao ativar aba: ' + tabId);
+      }
     }
     
     // Função para mostrar modal
@@ -1147,17 +1322,8 @@
         newDailyRecordBtn.disabled = true;
       }
       
-      // CORREÇÃO: Trocar para a aba de detalhes - chamando diretamente
-      setTimeout(function() {
-        // Forçar mudança para a aba de detalhes após um pequeno atraso
-        const detailsTab = document.querySelector('.tab[data-tab="patientDetails"]');
-        if (detailsTab) {
-          detailsTab.click();
-        } else {
-          // Fallback mais forte para trocar de aba
-          switchTab('patientDetails');
-        }
-      }, 50);
+      // Trocar para a aba de detalhes de forma direta e sem setTimeout
+      switchTab('patientDetails');
     }
     
     // Função para criar um novo registro diário
@@ -1218,17 +1384,8 @@
       // Limpar validação
       clearValidation(document.getElementById('recordForm'));
       
-      // CORREÇÃO: Trocar para a aba de registro diário - chamando diretamente
-      setTimeout(function() {
-        // Forçar mudança para a aba de registro diário após um pequeno atraso
-        const recordTab = document.querySelector('.tab[data-tab="dailyRecord"]');
-        if (recordTab) {
-          recordTab.click();
-        } else {
-          // Fallback mais forte para trocar de aba
-          switchTab('dailyRecord');
-        }
-      }, 50);
+      // Trocar para a aba de registro diário de forma direta e sem setTimeout
+      switchTab('dailyRecord');
     }
     
     // Função para visualizar um registro
@@ -1338,7 +1495,6 @@
         <input type="text" id="searchPatients" class="form-control" placeholder="Buscar pacientes...">
       </div>
       
-      <!-- CORREÇÃO: Adicionado onclick direto nas abas -->
       <div class="sticky-tabs tabs">
         <div class="tab active" data-tab="patientList" onclick="switchTab('patientList')">Lista de Pacientes</div>
         <div class="tab" data-tab="patientDetails" onclick="switchTab('patientDetails')">Detalhes do Paciente</div>
@@ -1885,6 +2041,9 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
   </div>
+
+
+
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
