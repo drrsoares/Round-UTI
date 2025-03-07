@@ -13,105 +13,100 @@
 </head>
 <body>
   <div class="container">
-    <!-- Seu HTML existente até onde irá a nova seção de Acesso Central -->
+    <!-- Conteúdo existente... -->
     
-    <!-- NOVA SEÇÃO: Acesso Central -->
-    <div class="form-group">
-      <div class="switch-container">
-        <label class="switch">
-          <input type="checkbox" id="hasCentralAccess">
-          <span class="slider"></span>
-        </label>
-        <label for="hasCentralAccess">Paciente com Acesso Central</label>
-      </div>
-    </div>
-    
-    <div id="centralAccessSection" class="hidden">
+    <!-- Modificação na seção de intubação para incluir data de início e cálculo do tempo -->
+    <div id="intubationSection" class="hidden">
       <div class="alert alert-info">
-        <i class="fas fa-info-circle"></i> Informações sobre o acesso central do paciente.
+        <i class="fas fa-info-circle"></i> Informações adicionais para paciente intubado.
       </div>
       
       <div class="flex-container">
         <div>
           <div class="form-group">
-            <label for="centralAccessLocation" class="form-label">Localização</label>
-            <select id="centralAccessLocation" class="form-control">
-              <option value="">Selecione</option>
-              <option value="VJD">VJD (Veia Jugular Direita)</option>
-              <option value="VJE">VJE (Veia Jugular Esquerda)</option>
-              <option value="VSCD">VSCD (Veia Subclávia Direita)</option>
-              <option value="VSCE">VSCE (Veia Subclávia Esquerda)</option>
-              <option value="VAD">VAD (Veia Axilar Direita)</option>
-              <option value="VAE">VAE (Veia Axilar Esquerda)</option>
-              <option value="FD">FD (Femoral Direita)</option>
-              <option value="FE">FE (Femoral Esquerda)</option>
-            </select>
+            <label for="intubationStartDate" class="form-label">Data de Início da Intubação</label>
+            <input type="date" id="intubationStartDate" class="form-control">
           </div>
         </div>
         <div>
           <div class="form-group">
-            <label for="centralAccessInsertionDate" class="form-label">Data de Inserção</label>
-            <input type="date" id="centralAccessInsertionDate" class="form-control">
+            <label class="form-label">Tempo de Intubação</label>
+            <div id="intubationDuration" class="form-control" style="background-color: var(--input-bg); padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
+              Informe a data de início
+            </div>
           </div>
         </div>
       </div>
       
       <div class="form-group">
-        <label class="form-label">Tempo de Uso</label>
-        <div id="centralAccessDuration" class="form-control" style="background-color: var(--input-bg); padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
-          Informe a data de inserção
+        <label for="canBeExtubated" class="form-label required-field">O paciente pode ser extubado?</label>
+        <div class="radio-group">
+          <label class="radio-container" style="margin-right: 20px; display: inline-block;">
+            <input type="radio" name="canBeExtubated" value="S"> Sim
+          </label>
+          <label class="radio-container" style="display: inline-block;">
+            <input type="radio" name="canBeExtubated" value="N"> Não
+          </label>
         </div>
       </div>
       
+      <div class="card" style="padding: 1rem; margin-bottom: 1rem; background-color: rgba(93, 92, 222, 0.05);">
+        <h4>Parâmetros de Ventilação Mecânica</h4>
+        
+        <!-- Outros campos de ventilação mecânica existentes -->
+      </div>
+      
       <div class="form-group">
-        <label for="centralAccessNotes" class="form-label">Observações</label>
-        <textarea id="centralAccessNotes" class="form-control" placeholder="Observações sobre o acesso central"></textarea>
+        <label for="intubationNotes" class="form-label">Observações sobre intubação</label>
+        <textarea id="intubationNotes" class="form-control notes-field" placeholder="Informe detalhes relevantes sobre a intubação ou condições respiratórias"></textarea>
       </div>
     </div>
     
-    <!-- Continuar com seu HTML existente -->
+    <!-- Resto do conteúdo existente... -->
   </div>
 
   <script>
-    // Seu JavaScript existente
+    // JavaScript existente...
     
-    // Adicione o novo evento na função setupEventListeners
+    // Adicionar eventos para o cálculo do tempo de intubação
     function setupEventListeners() {
-      // Seus eventos existentes
+      // Eventos existentes...
       
-      // NOVO: Evento para o checkbox de acesso central
-      document.getElementById('hasCentralAccess').addEventListener('change', function() {
-        const centralAccessSection = document.getElementById('centralAccessSection');
-        centralAccessSection.classList.toggle('hidden', !this.checked);
+      // Evento de checkbox de intubação
+      document.getElementById('isIntubated').addEventListener('change', function() {
+        const intubationSection = document.getElementById('intubationSection');
+        intubationSection.classList.toggle('hidden', !this.checked);
         
-        // Atualizar o cálculo de tempo de uso quando o checkbox for marcado
+        // Se o checkbox for marcado, atualizar o cálculo de tempo de intubação
         if (this.checked) {
-          updateCatheterDuration();
+          updateIntubationDuration();
         }
       });
       
-      // NOVO: Atualizar a duração do cateter quando a data de inserção mudar
-      document.getElementById('centralAccessInsertionDate').addEventListener('change', function() {
-        updateCatheterDuration();
+      // Atualizar a duração da intubação quando a data de início mudar
+      document.getElementById('intubationStartDate').addEventListener('change', function() {
+        updateIntubationDuration();
       });
+      
+      // Outros eventos existentes...
     }
     
-    // NOVA FUNÇÃO: Calcular e atualizar a duração do uso do cateter
-    function updateCatheterDuration() {
-      const insertionDateInput = document.getElementById('centralAccessInsertionDate');
-      const durationElement = document.getElementById('centralAccessDuration');
+    // Função para calcular e atualizar o tempo de intubação
+    function updateIntubationDuration() {
+      const startDateInput = document.getElementById('intubationStartDate');
+      const durationElement = document.getElementById('intubationDuration');
       
-      if (insertionDateInput.value) {
-        const insertionDate = new Date(insertionDateInput.value);
+      if (startDateInput.value) {
+        const startDate = new Date(startDateInput.value);
         const today = new Date();
         
         // Calcular a diferença em dias
-        const differenceInTime = today.getTime() - insertionDate.getTime();
+        const differenceInTime = today.getTime() - startDate.getTime();
         const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
         
         durationElement.textContent = `${differenceInDays} dias`;
         
-        // Adicionar alerta visual baseado no tempo de uso
+        // Adicionar alerta visual baseado no tempo de intubação
         durationElement.classList.remove('text-success', 'text-warning', 'text-danger');
         
         if (differenceInDays < 7) {
@@ -122,66 +117,68 @@
           durationElement.classList.add('text-danger');
         }
       } else {
-        durationElement.textContent = 'Informe a data de inserção';
+        durationElement.textContent = 'Informe a data de início';
         durationElement.classList.remove('text-success', 'text-warning', 'text-danger');
       }
     }
     
-    // Modificar a função saveRecord para incluir os dados do acesso central
+    // Modificar a função saveRecord para incluir a data de início e o tempo de intubação
     function saveRecord(event) {
-      // Seu código existente
+      // Código existente...
       
-      // Adicionar os dados do acesso central ao objeto record
-      const centralAccess = document.getElementById('hasCentralAccess').checked ? {
-        location: document.getElementById('centralAccessLocation').value,
-        insertionDate: document.getElementById('centralAccessInsertionDate').value,
-        notes: document.getElementById('centralAccessNotes').value
-      } : null;
-      
-      // Adicionar à estrutura de record existente
+      // Atualizar a estrutura de dados da intubação
       const record = {
-        // Suas propriedades de record existentes
-        centralAccess: centralAccess
-        // Outras propriedades
+        // Outras propriedades existentes...
+        intubation: document.getElementById('isIntubated').checked ? {
+          startDate: document.getElementById('intubationStartDate').value,
+          canBeExtubated: document.querySelector('input[name="canBeExtubated"]:checked')?.value || null,
+          notes: document.getElementById('intubationNotes').value || '',
+          ventilationParams: {
+            // Parâmetros de ventilação existentes...
+          }
+        } : null,
+        // Outras propriedades...
       };
       
-      // Restante da função saveRecord
+      // Resto da função saveRecord...
     }
     
-    // Modificar a função viewRecord para exibir informações do acesso central
+    // Modificar a função viewRecord para exibir informações sobre o tempo de intubação
     function viewRecord(recordId) {
-      // Seu código existente
+      // Código existente...
       
-      // Verificar se há informações de acesso central
-      const hasCentralAccess = record.centralAccess !== null;
+      // Verificar se há informações de intubação
+      const hasIntubation = record.intubation !== null;
       
-      // Criar HTML para acesso central
-      let centralAccessHtml = '';
-      if (hasCentralAccess) {
-        const location = record.centralAccess.location;
-        const insertionDate = formatDate(record.centralAccess.insertionDate);
-        const notes = record.centralAccess.notes || '';
+      // Atualizar o HTML para incluir informações sobre o tempo de intubação
+      if (hasIntubation && record.intubation.startDate) {
+        const startDate = formatDate(record.intubation.startDate);
         
-        // Calcular o tempo de uso até a data do registro
+        // Calcular o tempo de intubação até a data do registro
         const recordDate = new Date(record.date);
-        const insertDate = new Date(record.centralAccess.insertionDate);
-        const daysOfUse = Math.floor((recordDate - insertDate) / (1000 * 60 * 60 * 24));
+        const intubStartDate = new Date(record.intubation.startDate);
+        const daysIntubated = Math.floor((recordDate - intubStartDate) / (1000 * 60 * 60 * 24));
         
-        centralAccessHtml = `
-          <div class="divider"></div>
-          <div class="record-central-access">
-            <h4>Acesso Central</h4>
-            <p><strong>Localização:</strong> ${location}</p>
-            <p><strong>Data de Inserção:</strong> ${insertionDate}</p>
-            <p><strong>Tempo de Uso:</strong> ${daysOfUse} dias</p>
-            ${notes ? `<p><strong>Observações:</strong> ${notes}</p>` : ''}
+        // Adicionar ao HTML da seção de intubação
+        // Exemplo:
+        /*
+        let intubationHtml = `
+          <div class="record-intubation">
+            <h4>Informações de Intubação</h4>
+            <p><strong>Data de Início:</strong> ${startDate}</p>
+            <p><strong>Tempo de Intubação:</strong> ${daysIntubated} dias</p>
+            <p><strong>Pode ser extubado?</strong> ${record.intubation.canBeExtubated === 'S' ? 'Sim' : record.intubation.canBeExtubated === 'N' ? 'Não' : 'Não informado'}</p>
+            ${ventilationHtml}
+            ${record.intubation.notes ? `<p><strong>Observações sobre intubação:</strong> ${record.intubation.notes}</p>` : ''}
           </div>
         `;
+        */
       }
       
-      // Adicionar ao HTML final
-      // ${hasCentralAccess ? centralAccessHtml : ''}
+      // Resto da função viewRecord...
     }
+    
+    // Resto do JavaScript existente...
   </script>
 </body>
 </html>
