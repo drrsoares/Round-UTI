@@ -870,24 +870,7 @@
       padding: 1rem;
     }
     
-    /* Debug - Adicionando estilos para debug */
-    .debug-info {
-      background-color: rgba(255, 255, 0, 0.1);
-      border: 1px solid #f0ad4e;
-      border-radius: 4px;
-      padding: 10px;
-      margin-bottom: 15px;
-      font-family: monospace;
-      font-size: 12px;
-    }
-    .debug-info h4 {
-      margin-top: 0;
-      color: #f0ad4e;
-    }
-    .debug-info pre {
-      white-space: pre-wrap;
-      margin: 0;
-    }
+
     
     /* Novo indicador visual de que o paciente está selecionado */
     .patient-selected-indicator {
@@ -1036,12 +1019,7 @@
       </div>
     </div>
     
-    <!-- Painel de debug -->
-    <div id="debugContainer" class="debug-info" style="display: none;">
-      <h4>Painel de Debug <button id="clearDebugBtn" class="btn btn-sm btn-warning">Limpar</button></h4>
-      <div id="selectedPatientInfo">Nenhum paciente selecionado</div>
-      <div id="debugPanel" style="max-height: 200px; overflow-y: auto;"></div>
-    </div>
+
     
     <div class="card">
       <div class="search-container">
@@ -1241,7 +1219,7 @@
             </div>
             
             <div class="form-group">
-              <label for="medications" class="form-label">Medicamentos Administrados</label>
+              <label for="medications" class="form-label">Antibioticoterapia</label>
               <div id="medicationsList">
                 <div class="medication-entry">
                   <div class="flex-container">
@@ -1274,7 +1252,7 @@
                 </div>
               </div>
               <button type="button" id="addMedicationBtn" class="btn btn-sm btn-secondary mt-2">
-                <i class="fas fa-plus"></i> Adicionar Medicamento
+                <i class="fas fa-plus"></i> Adicionar Antibiótico
               </button>
             </div>
             
@@ -1311,6 +1289,181 @@
                 <option value="Restrito à cadeira">Restrito à cadeira</option>
                 <option value="Mobilidade prejudicada">Mobilidade prejudicada</option>
               </select>
+            </div>
+            
+            <div class="form-group">
+              <div class="switch-container">
+                <label class="switch">
+                  <input type="checkbox" id="isIntubated">
+                  <span class="slider"></span>
+                </label>
+                <label for="isIntubated">Paciente Intubado</label>
+              </div>
+            </div>
+            
+            <div id="intubationSection" class="hidden">
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Informações adicionais para paciente intubado.
+              </div>
+              
+              <div class="form-group">
+                <label for="canBeExtubated" class="form-label required-field">O paciente pode ser extubado?</label>
+                <div class="radio-group">
+                  <label class="radio-container" style="margin-right: 20px; display: inline-block;">
+                    <input type="radio" name="canBeExtubated" value="S"> Sim
+                  </label>
+                  <label class="radio-container" style="display: inline-block;">
+                    <input type="radio" name="canBeExtubated" value="N"> Não
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="intubationNotes" class="form-label">Observações sobre intubação</label>
+                <textarea id="intubationNotes" class="form-control notes-field" placeholder="Informe detalhes relevantes sobre a intubação ou condições respiratórias"></textarea>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <div class="switch-container">
+                <label class="switch">
+                  <input type="checkbox" id="isUnderSedation">
+                  <span class="slider"></span>
+                </label>
+                <label for="isUnderSedation">Paciente sob Sedação</label>
+              </div>
+            </div>
+            
+            <div id="sedationSection" class="hidden">
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Informações sobre sedação do paciente.
+              </div>
+              
+              <div id="sedationsList">
+                <div class="sedation-entry">
+                  <div class="flex-container">
+                    <div>
+                      <div class="form-group">
+                        <label for="sedationType" class="form-label">Tipo de Sedação</label>
+                        <select class="form-control sedation-type">
+                          <option value="">Selecione</option>
+                          <option value="Midazolam">Midazolam</option>
+                          <option value="Propofol">Propofol</option>
+                          <option value="Ketamina">Ketamina</option>
+                          <option value="Dexmedetomidina">Dexmedetomidina</option>
+                          <option value="Outro">Outro</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="form-group">
+                        <label for="sedationDose" class="form-label">Dose</label>
+                        <input type="text" class="form-control sedation-dose" placeholder="Ex: 5mg/h, 50mcg/kg/min">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <button type="button" id="addSedationBtn" class="btn btn-sm btn-secondary mt-2">
+                <i class="fas fa-plus"></i> Adicionar Sedação
+              </button>
+            </div>
+            
+            <div class="form-group">
+              <div class="switch-container">
+                <label class="switch">
+                  <input type="checkbox" id="isUnderAnalgesia">
+                  <span class="slider"></span>
+                </label>
+                <label for="isUnderAnalgesia">Paciente recebendo Analgesia</label>
+              </div>
+            </div>
+            
+            <div id="analgesiaSection" class="hidden">
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Informações sobre analgesia do paciente.
+              </div>
+              
+              <div id="analgesiaList">
+                <div class="analgesia-entry">
+                  <div class="flex-container">
+                    <div>
+                      <div class="form-group">
+                        <label for="analgesiaType" class="form-label">Tipo de Analgésico</label>
+                        <select class="form-control analgesia-type">
+                          <option value="">Selecione</option>
+                          <option value="Fentanil">Fentanil</option>
+                          <option value="Morfina">Morfina</option>
+                          <option value="Codeína">Codeína</option>
+                          <option value="Tramadol">Tramadol</option>
+                          <option value="Dipirona">Dipirona</option>
+                          <option value="Paracetamol">Paracetamol</option>
+                          <option value="AINH">AINH</option>
+                          <option value="Outro">Outro</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="form-group">
+                        <label for="analgesiaDaily" class="form-label">Dose Diária</label>
+                        <input type="text" class="form-control analgesia-daily" placeholder="Ex: 50mg 6/6h, 1g 4x/dia">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <button type="button" id="addAnalgesiaBtn" class="btn btn-sm btn-secondary mt-2">
+                <i class="fas fa-plus"></i> Adicionar Analgésico
+              </button>
+            </div>
+            
+            <div class="form-group">
+              <div class="switch-container">
+                <label class="switch">
+                  <input type="checkbox" id="isUnderVasopressors">
+                  <span class="slider"></span>
+                </label>
+                <label for="isUnderVasopressors">Paciente recebendo Drogas Vasoativas (DVA)</label>
+              </div>
+            </div>
+            
+            <div id="vasopressorSection" class="hidden">
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Informações sobre drogas vasoativas do paciente.
+              </div>
+              
+              <div id="vasopressorList">
+                <div class="vasopressor-entry">
+                  <div class="flex-container">
+                    <div>
+                      <div class="form-group">
+                        <label for="vasopressorType" class="form-label">Tipo de Droga Vasoativa</label>
+                        <select class="form-control vasopressor-type">
+                          <option value="">Selecione</option>
+                          <option value="Norepinefrina">Norepinefrina</option>
+                          <option value="Adrenalina">Adrenalina</option>
+                          <option value="Vasopressina">Vasopressina</option>
+                          <option value="Dobutamina">Dobutamina</option>
+                          <option value="Dopamina">Dopamina</option>
+                          <option value="Outra">Outra</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="form-group">
+                        <label for="vasopressorDose" class="form-label">Dose (ml/h)</label>
+                        <input type="text" class="form-control vasopressor-dose" placeholder="Ex: 5ml/h, 10ml/h">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <button type="button" id="addVasopressorBtn" class="btn btn-sm btn-secondary mt-2">
+                <i class="fas fa-plus"></i> Adicionar Droga Vasoativa
+              </button>
             </div>
             
             <div class="form-group">
@@ -1657,7 +1810,7 @@
     };
     
     // Constante para mostrar/esconder o modo debug
-    const DEBUG_MODE = true;
+    const DEBUG_MODE = false;
     
     document.addEventListener('DOMContentLoaded', function() {
       // Verificar o esquema de cores preferido
@@ -2672,6 +2825,60 @@
         }
       });
       
+      // Coletar dados de sedação
+      const sedationEntries = document.querySelectorAll('.sedation-entry');
+      const sedations = [];
+      
+      if (document.getElementById('isUnderSedation').checked) {
+        sedationEntries.forEach(entry => {
+          const type = entry.querySelector('.sedation-type').value;
+          const dose = entry.querySelector('.sedation-dose').value.trim();
+          
+          if (type && dose) {
+            sedations.push({
+              type,
+              dose
+            });
+          }
+        });
+      }
+      
+      // Coletar dados de analgesia
+      const analgesiaEntries = document.querySelectorAll('.analgesia-entry');
+      const analgesics = [];
+      
+      if (document.getElementById('isUnderAnalgesia').checked) {
+        analgesiaEntries.forEach(entry => {
+          const type = entry.querySelector('.analgesia-type').value;
+          const daily = entry.querySelector('.analgesia-daily').value.trim();
+          
+          if (type && daily) {
+            analgesics.push({
+              type,
+              daily
+            });
+          }
+        });
+      }
+      
+      // Coletar dados de drogas vasoativas
+      const vasopressorEntries = document.querySelectorAll('.vasopressor-entry');
+      const vasopressors = [];
+      
+      if (document.getElementById('isUnderVasopressors').checked) {
+        vasopressorEntries.forEach(entry => {
+          const type = entry.querySelector('.vasopressor-type').value;
+          const dose = entry.querySelector('.vasopressor-dose').value.trim();
+          
+          if (type && dose) {
+            vasopressors.push({
+              type,
+              dose
+            });
+          }
+        });
+      }
+      
       const record = {
         id: appData.editingRecordId || generateId(),
         patientId: appData.selectedPatientId,
@@ -2690,6 +2897,19 @@
         observations: document.getElementById('observations').value,
         nutritionalStatus: document.getElementById('nutritionalStatus').value,
         mobilityStatus: document.getElementById('mobilityStatus').value,
+        intubation: document.getElementById('isIntubated').checked ? {
+          canBeExtubated: document.querySelector('input[name="canBeExtubated"]:checked')?.value || null,
+          notes: document.getElementById('intubationNotes').value || ''
+        } : null,
+        sedation: document.getElementById('isUnderSedation').checked ? {
+          sedations: sedations
+        } : null,
+        analgesia: document.getElementById('isUnderAnalgesia').checked ? {
+          analgesics: analgesics
+        } : null,
+        vasopressors: document.getElementById('isUnderVasopressors').checked ? {
+          drugs: vasopressors
+        } : null,
         discharge: null
       };
       
@@ -2775,6 +2995,64 @@
       if (record.vitalSigns.painLevel) vitals.push(`<li>Nível de Dor: ${record.vitalSigns.painLevel}/10</li>`);
       
       const hasDischarge = record.discharge !== null;
+      const hasIntubation = record.intubation !== null;
+      
+      // Verificar se há sedação
+      const hasSedation = record.sedation !== null && record.sedation?.sedations && record.sedation.sedations.length > 0;
+      
+      // Verificar se há analgesia
+      const hasAnalgesia = record.analgesia !== null && record.analgesia?.analgesics && record.analgesia.analgesics.length > 0;
+      
+      // Verificar se há drogas vasoativas
+      const hasVasopressors = record.vasopressors !== null && record.vasopressors?.drugs && record.vasopressors.drugs.length > 0;
+      
+      // Criar conteúdo HTML para medicamentos de sedação
+      let sedationHtml = '';
+      if (hasSedation) {
+        const sedations = record.sedation.sedations.map(sed => 
+          `<li>${sed.type} - ${sed.dose}</li>`
+        ).join('');
+        
+        sedationHtml = `
+          <div class="divider"></div>
+          <div class="record-sedation">
+            <h4>Sedação</h4>
+            <ul>${sedations}</ul>
+          </div>
+        `;
+      }
+      
+      // Criar conteúdo HTML para analgésicos
+      let analgesiaHtml = '';
+      if (hasAnalgesia) {
+        const analgesics = record.analgesia.analgesics.map(analg => 
+          `<li>${analg.type} - ${analg.daily}</li>`
+        ).join('');
+        
+        analgesiaHtml = `
+          <div class="divider"></div>
+          <div class="record-analgesia">
+            <h4>Analgesia</h4>
+            <ul>${analgesics}</ul>
+          </div>
+        `;
+      }
+      
+      // Criar conteúdo HTML para drogas vasoativas
+      let vasopressorsHtml = '';
+      if (hasVasopressors) {
+        const vasopressors = record.vasopressors.drugs.map(drug => 
+          `<li>${drug.type} - ${drug.dose}</li>`
+        ).join('');
+        
+        vasopressorsHtml = `
+          <div class="divider"></div>
+          <div class="record-vasopressors">
+            <h4>Drogas Vasoativas (DVA)</h4>
+            <ul>${vasopressors}</ul>
+          </div>
+        `;
+      }
       
       const recordDetails = document.getElementById('recordDetails');
       recordDetails.innerHTML = `
@@ -2822,6 +3100,18 @@
             <p>${record.mobilityStatus}</p>
           </div>
         ` : ''}
+        
+        ${hasIntubation ? `
+          <div class="divider"></div>
+          
+          <div class="record-intubation">
+            <h4>Informações de Intubação</h4>
+            <p><strong>Pode ser extubado?</strong> ${record.intubation.canBeExtubated === 'S' ? 'Sim' : record.intubation.canBeExtubated === 'N' ? 'Não' : 'Não informado'}</p>
+            ${record.intubation.notes ? `<p><strong>Observações sobre intubação:</strong> ${record.intubation.notes}</p>` : ''}
+          </div>
+        ` : ''}
+        
+        ${hasSedation ? sedationHtml : ''}
         
         ${hasDischarge ? `
           <div class="divider"></div>
@@ -3462,6 +3752,178 @@
         const dischargeSection = document.getElementById('dischargeSection');
         dischargeSection.classList.toggle('hidden', !this.checked);
       });
+      
+      // Evento de checkbox de intubação
+      document.getElementById('isIntubated').addEventListener('change', function() {
+        const intubationSection = document.getElementById('intubationSection');
+        intubationSection.classList.toggle('hidden', !this.checked);
+      });
+      
+      // Evento de checkbox de sedação
+      document.getElementById('isUnderSedation').addEventListener('change', function() {
+        const sedationSection = document.getElementById('sedationSection');
+        sedationSection.classList.toggle('hidden', !this.checked);
+      });
+      
+      // Adicionar sedação
+      document.getElementById('addSedationBtn').addEventListener('click', function() {
+        addSedation();
+      });
+      
+      // Evento de checkbox de analgesia
+      document.getElementById('isUnderAnalgesia').addEventListener('change', function() {
+        const analgesiaSection = document.getElementById('analgesiaSection');
+        analgesiaSection.classList.toggle('hidden', !this.checked);
+      });
+      
+      // Adicionar analgésico
+      document.getElementById('addAnalgesiaBtn').addEventListener('click', function() {
+        addAnalgesia();
+      });
+      
+      // Evento de checkbox de drogas vasoativas
+      document.getElementById('isUnderVasopressors').addEventListener('change', function() {
+        const vasopressorSection = document.getElementById('vasopressorSection');
+        vasopressorSection.classList.toggle('hidden', !this.checked);
+      });
+      
+      // Adicionar droga vasoativa
+      document.getElementById('addVasopressorBtn').addEventListener('click', function() {
+        addVasopressor();
+      });
+      
+    // Função para adicionar nova entrada de sedação
+    function addSedation() {
+      logDebug('Adicionando campo de sedação');
+      
+      const sedationsList = document.getElementById('sedationsList');
+      const newEntry = document.createElement('div');
+      newEntry.className = 'sedation-entry';
+      newEntry.innerHTML = `
+        <div class="flex-container">
+          <div>
+            <div class="form-group">
+              <label for="sedationType" class="form-label">Tipo de Sedação</label>
+              <select class="form-control sedation-type">
+                <option value="">Selecione</option>
+                <option value="Midazolam">Midazolam</option>
+                <option value="Propofol">Propofol</option>
+                <option value="Ketamina">Ketamina</option>
+                <option value="Dexmedetomidina">Dexmedetomidina</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label for="sedationDose" class="form-label">Dose</label>
+              <input type="text" class="form-control sedation-dose" placeholder="Ex: 5mg/h, 50mcg/kg/min">
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger remove-sedation mt-2">
+          <i class="fas fa-trash-alt"></i> Remover
+        </button>
+      `;
+      
+      sedationsList.appendChild(newEntry);
+      
+      // Adicionar evento ao botão de remover
+      const removeButton = newEntry.querySelector('.remove-sedation');
+      removeButton.addEventListener('click', function() {
+        sedationsList.removeChild(newEntry);
+      });
+    }
+    
+    // Função para adicionar nova entrada de vasopressor (drogas vasoativas)
+    function addVasopressor() {
+      logDebug('Adicionando campo de droga vasoativa');
+      
+      const vasopressorList = document.getElementById('vasopressorList');
+      const newEntry = document.createElement('div');
+      newEntry.className = 'vasopressor-entry';
+      newEntry.innerHTML = `
+        <div class="flex-container">
+          <div>
+            <div class="form-group">
+              <label for="vasopressorType" class="form-label">Tipo de Droga Vasoativa</label>
+              <select class="form-control vasopressor-type">
+                <option value="">Selecione</option>
+                <option value="Norepinefrina">Norepinefrina</option>
+                <option value="Adrenalina">Adrenalina</option>
+                <option value="Vasopressina">Vasopressina</option>
+                <option value="Dobutamina">Dobutamina</option>
+                <option value="Dopamina">Dopamina</option>
+                <option value="Outra">Outra</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label for="vasopressorDose" class="form-label">Dose (ml/h)</label>
+              <input type="text" class="form-control vasopressor-dose" placeholder="Ex: 5ml/h, 10ml/h">
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger remove-vasopressor mt-2">
+          <i class="fas fa-trash-alt"></i> Remover
+        </button>
+      `;
+      
+      vasopressorList.appendChild(newEntry);
+      
+      // Adicionar evento ao botão de remover
+      const removeButton = newEntry.querySelector('.remove-vasopressor');
+      removeButton.addEventListener('click', function() {
+        vasopressorList.removeChild(newEntry);
+      });
+    }
+    
+    // Função para adicionar nova entrada de analgesia
+    function addAnalgesia() {
+      logDebug('Adicionando campo de analgesia');
+      
+      const analgesiaList = document.getElementById('analgesiaList');
+      const newEntry = document.createElement('div');
+      newEntry.className = 'analgesia-entry';
+      newEntry.innerHTML = `
+        <div class="flex-container">
+          <div>
+            <div class="form-group">
+              <label for="analgesiaType" class="form-label">Tipo de Analgésico</label>
+              <select class="form-control analgesia-type">
+                <option value="">Selecione</option>
+                <option value="Fentanil">Fentanil</option>
+                <option value="Morfina">Morfina</option>
+                <option value="Codeína">Codeína</option>
+                <option value="Tramadol">Tramadol</option>
+                <option value="Dipirona">Dipirona</option>
+                <option value="Paracetamol">Paracetamol</option>
+                <option value="AINH">AINH</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label for="analgesiaDaily" class="form-label">Dose Diária</label>
+              <input type="text" class="form-control analgesia-daily" placeholder="Ex: 50mg 6/6h, 1g 4x/dia">
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger remove-analgesia mt-2">
+          <i class="fas fa-trash-alt"></i> Remover
+        </button>
+      `;
+      
+      analgesiaList.appendChild(newEntry);
+      
+      // Adicionar evento ao botão de remover
+      const removeButton = newEntry.querySelector('.remove-analgesia');
+      removeButton.addEventListener('click', function() {
+        analgesiaList.removeChild(newEntry);
+      });
+    }
       
       // Evento de cancelamento de registro
       document.getElementById('cancelRecordBtn').addEventListener('click', function() {
