@@ -1003,19 +1003,6 @@
         transform: translateX(100%) rotate(45deg);
       }
     }
-    
-    /* Cores para indicadores de tempo */
-    .text-success {
-      color: var(--success-color);
-    }
-    
-    .text-warning {
-      color: var(--warning-color);
-    }
-    
-    .text-danger {
-      color: var(--danger-color);
-    }
   </style>
 </head>
 <body>
@@ -1329,23 +1316,6 @@
                 <i class="fas fa-info-circle"></i> Informações adicionais para paciente intubado.
               </div>
               
-              <div class="flex-container">
-                <div>
-                  <div class="form-group">
-                    <label for="intubationStartDate" class="form-label">Data de Início da Intubação</label>
-                    <input type="date" id="intubationStartDate" class="form-control">
-                  </div>
-                </div>
-                <div>
-                  <div class="form-group">
-                    <label class="form-label">Tempo de Intubação</label>
-                    <div id="intubationDuration" class="form-control" style="background-color: var(--input-bg); padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
-                      Informe a data de início
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
               <div class="form-group">
                 <label for="canBeExtubated" class="form-label required-field">O paciente pode ser extubado?</label>
                 <div class="radio-group">
@@ -1630,59 +1600,6 @@
             <div class="form-group">
               <div class="switch-container">
                 <label class="switch">
-                  <input type="checkbox" id="hasCentralAccess">
-                  <span class="slider"></span>
-                </label>
-                <label for="hasCentralAccess">Paciente com Acesso Central</label>
-              </div>
-            </div>
-            
-            <div id="centralAccessSection" class="hidden">
-              <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> Informações sobre o acesso central do paciente.
-              </div>
-              
-              <div class="flex-container">
-                <div>
-                  <div class="form-group">
-                    <label for="centralAccessLocation" class="form-label">Localização</label>
-                    <select id="centralAccessLocation" class="form-control">
-                      <option value="">Selecione</option>
-                      <option value="VJD">VJD (Veia Jugular Direita)</option>
-                      <option value="VJE">VJE (Veia Jugular Esquerda)</option>
-                      <option value="VSCD">VSCD (Veia Subclávia Direita)</option>
-                      <option value="VSCE">VSCE (Veia Subclávia Esquerda)</option>
-                      <option value="VAD">VAD (Veia Axilar Direita)</option>
-                      <option value="VAE">VAE (Veia Axilar Esquerda)</option>
-                      <option value="FD">FD (Femoral Direita)</option>
-                      <option value="FE">FE (Femoral Esquerda)</option>
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <div class="form-group">
-                    <label for="centralAccessInsertionDate" class="form-label">Data de Inserção</label>
-                    <input type="date" id="centralAccessInsertionDate" class="form-control">
-                  </div>
-                </div>
-              </div>
-              
-              <div class="form-group">
-                <label class="form-label">Tempo de Uso</label>
-                <div id="centralAccessDuration" class="form-control" style="background-color: var(--input-bg); padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
-                  Informe a data de inserção
-                </div>
-              </div>
-              
-              <div class="form-group">
-                <label for="centralAccessNotes" class="form-label">Observações</label>
-                <textarea id="centralAccessNotes" class="form-control" placeholder="Observações sobre o acesso central"></textarea>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <div class="switch-container">
-                <label class="switch">
                   <input type="checkbox" id="dischargePatient">
                   <span class="slider"></span>
                 </label>
@@ -1744,16 +1661,272 @@
       </div>
       
       <div id="patientHistory" class="tab-content">
-        <!-- Resto do conteúdo do histórico -->
+        <div id="historyContainer" class="hidden">
+          <div class="history-filters">
+            <div class="flex-container">
+              <div>
+                <div class="form-group">
+                  <label for="historyDateStart" class="form-label">Data inicial</label>
+                  <input type="date" id="historyDateStart" class="form-control">
+                </div>
+              </div>
+              <div>
+                <div class="form-group">
+                  <label for="historyDateEnd" class="form-label">Data final</label>
+                  <input type="date" id="historyDateEnd" class="form-control">
+                </div>
+              </div>
+              <div>
+                <div class="form-group">
+                  <label for="historyView" class="form-label">Visualização</label>
+                  <select id="historyView" class="form-control">
+                    <option value="timeline">Linha do tempo</option>
+                    <option value="table">Tabela</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="btn-group">
+              <!-- NOVO: Botão de novo registro na aba de histórico -->
+              <button class="btn btn-primary highlight-btn" onclick="createNewDailyRecord()">
+                <i class="fas fa-plus"></i> Novo Registro
+              </button>
+              <button id="exportPatientBtn" class="btn btn-success">
+                <i class="fas fa-file-export"></i> Exportar para Excel
+              </button>
+            </div>
+          </div>
+          
+          <div id="historyTimeline" class="history-timeline">
+            <!-- Timeline de registros será carregada aqui -->
+          </div>
+          
+          <div id="historyTable" class="table-container hidden">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Sinais Vitais</th>
+                  <th>Medicamentos</th>
+                  <th>Observações</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <!-- Dados da tabela serão carregados aqui -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="empty-state" id="historyEmptyState">
+          <i class="fas fa-history"></i>
+          <div class="empty-state-text">Selecione um paciente para visualizar o histórico</div>
+          <p>Vá para a aba "Lista de Pacientes" e selecione um paciente para visualizar o histórico.</p>
+        </div>
       </div>
       
       <div id="patientStats" class="tab-content">
-        <!-- Resto do conteúdo das estatísticas -->
+        <div id="statsContainer" class="hidden">
+          <div class="flex-container">
+            <div class="card">
+              <h3>Internação</h3>
+              <div class="info-group">
+                <p><strong>Data de Internação:</strong> <span id="statAdmissionDate">--/--/----</span></p>
+                <p><strong>Diagnóstico:</strong> <span id="statDiagnosis">--</span></p>
+                <p><strong>Tempo de Internação:</strong> <span id="statHospitalDays">--</span></p>
+              </div>
+            </div>
+            <div class="card">
+              <h3>Status Atual</h3>
+              <div class="info-group">
+                <p><strong>Situação:</strong> <span id="statCurrentStatus">--</span></p>
+                <p><strong>Última Atualização:</strong> <span id="statLastUpdate">--/--/----</span></p>
+                
+                <!-- NOVO: Botão de novo registro na aba de estatísticas -->
+                <button class="btn btn-primary btn-sm mt-2" onclick="createNewDailyRecord()">
+                  <i class="fas fa-plus"></i> Adicionar Registro
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <h3>Gráficos de Sinais Vitais</h3>
+            <div class="form-group">
+              <label for="vitalSignSelect" class="form-label">Selecione o sinal vital:</label>
+              <select id="vitalSignSelect" class="form-control">
+                <option value="temperature">Temperatura</option>
+                <option value="heartRate">Frequência Cardíaca</option>
+                <option value="oxygenSaturation">Saturação de O₂</option>
+                <option value="painLevel">Nível de Dor</option>
+              </select>
+            </div>
+            <div class="chart-container">
+              <canvas id="vitalSignsChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="card">
+            <h3>Medicamentos Utilizados</h3>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Medicamento</th>
+                    <th>Dosagem</th>
+                    <th>Via</th>
+                    <th>Frequência</th>
+                  </tr>
+                </thead>
+                <tbody id="medicationStatsTable">
+                  <!-- Estatísticas de medicamentos serão carregadas aqui -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <div class="empty-state" id="statsEmptyState">
+          <i class="fas fa-chart-bar"></i>
+          <div class="empty-state-text">Selecione um paciente para visualizar as estatísticas</div>
+          <p>Vá para a aba "Lista de Pacientes" e selecione um paciente para visualizar as estatísticas.</p>
+        </div>
       </div>
     </div>
     
+    <!-- NOVO: Botão flutuante para adicionar registro -->
+    <div class="floating-action-button" id="floatingAddButton" onclick="createNewDailyRecord()" style="display:none">
+      <i class="fas fa-plus"></i>
+      <div class="fab-tooltip">Novo Registro</div>
+    </div>
+    
     <!-- MODAIS -->
-    <!-- Modal de Novo/Editar Paciente, etc. -->
+    <!-- Modal de Novo/Editar Paciente -->
+    <div id="patientModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="hideModal('patientModal')">&times;</span>
+        <div class="modal-header">
+          <h2 id="patientModalTitle">Novo Paciente</h2>
+        </div>
+        <form id="patientForm">
+          <div class="form-group">
+            <label for="patientName" class="form-label required-field">Nome Completo</label>
+            <input type="text" id="patientName" class="form-control" required>
+            <div class="validation-message">Nome é obrigatório</div>
+          </div>
+          
+          <div class="flex-container">
+            <div>
+              <div class="form-group">
+                <label for="patientBirthdate" class="form-label required-field">Data de Nascimento</label>
+                <input type="date" id="patientBirthdate" class="form-control" required>
+                <div class="validation-message">Data de nascimento é obrigatória</div>
+              </div>
+            </div>
+            <div>
+              <div class="form-group">
+                <label for="patientGender" class="form-label required-field">Gênero</label>
+                <select id="patientGender" class="form-control" required>
+                  <option value="">Selecione</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Outro">Outro</option>
+                </select>
+                <div class="validation-message">Gênero é obrigatório</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex-container">
+            <div>
+              <div class="form-group">
+                <label for="patientRecord" class="form-label required-field">Número de Registro</label>
+                <input type="text" id="patientRecord" class="form-control" required>
+                <div class="validation-message">Número de registro é obrigatório</div>
+              </div>
+            </div>
+            <div>
+              <div class="form-group">
+                <label for="patientMedicalRecord" class="form-label required-field">Número do Prontuário</label>
+                <input type="text" id="patientMedicalRecord" class="form-control" required>
+                <div class="validation-message">Número do prontuário é obrigatório</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="patientContact" class="form-label">Contato</label>
+            <input type="tel" id="patientContact" class="form-control" placeholder="(00) 00000-0000">
+          </div>
+          
+          <div class="form-group">
+            <label for="patientAdmissionDate" class="form-label required-field">Data de Internação</label>
+            <input type="date" id="patientAdmissionDate" class="form-control" required>
+            <div class="validation-message">Data de internação é obrigatória</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="patientDiagnosis" class="form-label required-field">Diagnóstico Principal</label>
+            <textarea id="patientDiagnosis" class="form-control" required></textarea>
+            <div class="validation-message">Diagnóstico é obrigatório</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="patientAllergies" class="form-label">Alergias</label>
+            <textarea id="patientAllergies" class="form-control" placeholder="Se não houver, deixe em branco"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="patientNotes" class="form-label">Observações Iniciais</label>
+            <textarea id="patientNotes" class="form-control"></textarea>
+          </div>
+          
+          <div class="btn-group">
+            <button type="submit" id="savePatientBtn" class="btn btn-primary">
+              <i class="fas fa-save"></i> Salvar
+            </button>
+            <button type="button" onclick="hideModal('patientModal')" class="btn btn-secondary">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="hideModal('confirmModal')">&times;</span>
+        <div class="modal-header">
+          <h2>Confirmação</h2>
+        </div>
+        <p id="confirmMessage">Tem certeza que deseja realizar esta ação?</p>
+        <div class="btn-group">
+          <button id="confirmYesBtn" class="btn btn-danger">Sim, confirmar</button>
+          <button onclick="hideModal('confirmModal')" class="btn btn-secondary">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal de Visualização do Registro -->
+    <div id="viewRecordModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="hideModal('viewRecordModal')">&times;</span>
+        <div class="modal-header">
+          <h2>Detalhes do Registro</h2>
+        </div>
+        <div id="recordDetails">
+          <!-- Detalhes do registro serão carregados aqui -->
+        </div>
+        <div class="btn-group">
+          <button onclick="hideModal('viewRecordModal')" class="btn btn-secondary">Fechar</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
   </div>
 
   <script>
@@ -1783,6 +1956,11 @@
         }
       });
       
+      // Configurar o modo debug
+      if (DEBUG_MODE) {
+        document.getElementById('debugContainer').style.display = 'block';
+      }
+      
       // Carregar dados do localStorage
       loadDataFromStorage();
       
@@ -1807,6 +1985,1913 @@
       logDebug('Sistema inicializado com sucesso!');
     });
     
+    /**
+     * FUNÇÕES RELACIONADAS À INTERFACE E NAVEGAÇÃO
+     */
+    
+    // Função para alternar entre abas com feedback visual e validação
+    function manualTabSwitch(tabId) {
+      logDebug('Solicitação de troca para aba: ' + tabId);
+      
+      // Se não tem paciente selecionado, apenas permite a primeira aba
+      if (tabId !== 'patientList' && !appData.selectedPatientId) {
+        logDebug('Troca de aba bloqueada: nenhum paciente selecionado');
+        showToast('Selecione um paciente primeiro!', 'warning');
+        
+        // Forçar seleção da aba lista de pacientes
+        switchTab('patientList');
+        return;
+      }
+      
+      // Caso especial: para registro diário, garantir que o paciente esteja ativo
+      if (tabId === 'dailyRecord') {
+        const selectedPatient = appData.patients.find(p => p.id === appData.selectedPatientId);
+        if (selectedPatient && !selectedPatient.isActive) {
+          logDebug('Troca para aba de registro bloqueada: paciente com alta');
+          showToast('Este paciente já teve alta. Não é possível adicionar registros.', 'warning');
+          return;
+        }
+        
+        // Mostrar o botão grande de novo registro
+        document.getElementById('newRecordButtonContainer').style.display = 'block';
+        document.getElementById('dailyRecordForm').classList.add('hidden');
+        document.getElementById('dailyRecordEmptyState').classList.add('hidden');
+      }
+      
+      // Proceder com a troca de aba
+      logDebug('Troca de aba permitida para: ' + tabId);
+      switchTab(tabId);
+      
+      // Atualizar a última aba acessada
+      appData.lastSelectedTabId = tabId;
+      
+      // Atualizar visibilidade do botão flutuante
+      updateFloatingButtonVisibility();
+    }
+    
+    // Função para atualizar a visibilidade do botão flutuante
+    function updateFloatingButtonVisibility() {
+      const floatingButton = document.getElementById('floatingAddButton');
+      
+      // Mostrar botão apenas se houver um paciente selecionado
+      if (appData.selectedPatientId) {
+        const patient = appData.patients.find(p => p.id === appData.selectedPatientId);
+        
+        // Apenas pacientes ativos podem ter registros
+        if (patient && patient.isActive) {
+          floatingButton.style.display = 'flex';
+        } else {
+          floatingButton.style.display = 'none';
+        }
+      } else {
+        floatingButton.style.display = 'none';
+      }
+    }
+    
+    // Função atualizada para troca de abas que implementa a lógica 
+    function switchTab(tabId) {
+      // Atualizar as classes das abas
+      document.querySelectorAll('.tab').forEach(function(tab) {
+        if (tab.getAttribute('data-tab') === tabId) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+      
+      // Atualizar as classes dos conteúdos das abas
+      document.querySelectorAll('.tab-content').forEach(function(content) {
+        if (content.id === tabId) {
+          content.classList.add('active');
+        } else {
+          content.classList.remove('active');
+        }
+      });
+      
+      // Verificar se a aba ativa foi alterada e atualizar o layout conforme necessário
+      updateTabContent(tabId);
+      
+      logDebug('Aba ativada: ' + tabId);
+    }
+    
+    // Função para atualizar conteúdo da aba baseado no ID
+    function updateTabContent(tabId) {
+      if (tabId === 'patientList') {
+        renderPatientList();
+      } else if (tabId === 'patientDetails' && appData.selectedPatientId) {
+        renderPatientDetails(appData.selectedPatientId);
+      } else if (tabId === 'patientHistory' && appData.selectedPatientId) {
+        renderHistoryTimeline(appData.selectedPatientId);
+      } else if (tabId === 'patientStats' && appData.selectedPatientId) {
+        renderStats(appData.selectedPatientId);
+      } else if (tabId === 'dailyRecord' && appData.selectedPatientId) {
+        // Atualizando estados para a aba de registro diário
+        const patient = appData.patients.find(p => p.id === appData.selectedPatientId);
+        if (patient) {
+          // Atualizar nome do paciente atual no formulário
+          document.getElementById('currentPatientName').textContent = patient.name;
+          
+          // Se o formulário não estiver ativo, mostrar o botão grande
+          if (document.getElementById('dailyRecordForm').classList.contains('hidden')) {
+            document.getElementById('newRecordButtonContainer').style.display = 'block';
+          }
+        }
+      }
+    }
+    
+    // Mostrar modal
+    function showModal(modalId) {
+      logDebug('Abrindo modal: ' + modalId);
+      document.getElementById(modalId).style.display = 'block';
+      
+      // Se for o modal de paciente e for para novo paciente, prepara-o
+      if (modalId === 'patientModal' && !appData.editingPatientId) {
+        prepareNewPatient();
+      }
+    }
+    
+    // Esconder modal
+    function hideModal(modalId) {
+      logDebug('Fechando modal: ' + modalId);
+      document.getElementById(modalId).style.display = 'none';
+    }
+    
+    // Mostrar notificação toast
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast';
+      toast.classList.add(type);
+      toast.classList.add('show');
+      
+      logDebug(`Toast: ${message} (${type})`);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Atualizar indicador de paciente selecionado
+    function updatePatientSelectedIndicator() {
+      const indicator = document.getElementById('patientSelectedIndicator');
+      const nameSpan = document.getElementById('selectedPatientName');
+      
+      if (appData.selectedPatientId) {
+        const patient = appData.patients.find(p => p.id === appData.selectedPatientId);
+        if (patient) {
+          nameSpan.textContent = patient.name;
+          indicator.style.display = 'block';
+        } else {
+          indicator.style.display = 'none';
+        }
+      } else {
+        indicator.style.display = 'none';
+      }
+    }
+    
+    /**
+     * FUNÇÕES RELACIONADAS AOS DADOS
+     */
+    
+    // Função para carregar dados do localStorage
+    function loadDataFromStorage() {
+      try {
+        const patientsData = localStorage.getItem('patients');
+        const recordsData = localStorage.getItem('records');
+        
+        if (patientsData) {
+          appData.patients = JSON.parse(patientsData);
+          logDebug(`Carregados ${appData.patients.length} pacientes do localStorage`);
+        }
+        
+        if (recordsData) {
+          appData.records = JSON.parse(recordsData);
+          logDebug(`Carregados ${appData.records.length} registros do localStorage`);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        logDebug('Erro ao carregar dados do armazenamento: ' + error.message);
+      }
+    }
+    
+    // Salvar dados no localStorage
+    function saveDataToStorage() {
+      try {
+        localStorage.setItem('patients', JSON.stringify(appData.patients));
+        localStorage.setItem('records', JSON.stringify(appData.records));
+        logDebug('Dados salvos no localStorage');
+      } catch (error) {
+        console.error('Erro ao salvar dados:', error);
+        logDebug('Erro ao salvar dados: ' + error.message);
+      }
+    }
+    
+    // Gerar ID único
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+    
+    // Adicionar dados de exemplo
+    function addSampleData() {
+      logDebug('Verificando necessidade de adicionar dados de exemplo');
+      
+      if (appData.patients.length === 0) {
+        // Adicionar pacientes de exemplo
+        const samplePatients = [
+          {
+            id: generateId(),
+            name: 'João Silva',
+            birthdate: '1965-05-10',
+            gender: 'Masculino',
+            record: '12345',
+            medicalRecord: '987654',
+            contact: '(11) 98765-4321',
+            admissionDate: '2023-06-15',
+            diagnosis: 'Pneumonia comunitária',
+            allergies: 'Penicilina',
+            notes: 'Paciente com comorbidade de hipertensão e diabetes.',
+            dischargeDate: null,
+            isActive: true
+          },
+          {
+            id: generateId(),
+            name: 'Maria Oliveira',
+            birthdate: '1978-11-22',
+            gender: 'Feminino',
+            record: '23456',
+            medicalRecord: '876543',
+            contact: '(11) 91234-5678',
+            admissionDate: '2023-06-20',
+            diagnosis: 'Insuficiência cardíaca descompensada',
+            allergies: 'Sulfas',
+            notes: 'Paciente apresenta edema em membros inferiores.',
+            dischargeDate: null,
+            isActive: true
+          }
+        ];
+        
+        appData.patients = samplePatients;
+        
+        // Adicionar registros de exemplo
+        const patient1Id = samplePatients[0].id;
+        const patient2Id = samplePatients[1].id;
+        
+        const sampleRecords = [
+          {
+            id: generateId(),
+            patientId: patient1Id,
+            date: '2023-06-15',
+            time: '14:30',
+            vitalSigns: {
+              temperature: 38.5,
+              heartRate: 95,
+              bloodPressure: '130/85',
+              respiratoryRate: 20,
+              oxygenSaturation: 93,
+              painLevel: 3
+            },
+            medications: [
+              {
+                name: 'Ceftriaxona',
+                dose: '1g',
+                route: 'Intravenosa'
+              },
+              {
+                name: 'Dipirona',
+                dose: '1g',
+                route: 'Oral'
+              }
+            ],
+            procedures: 'Coleta de hemoculturas',
+            observations: 'Paciente relata melhora da dispneia após medicação.',
+            nutritionalStatus: 'Adequado',
+            mobilityStatus: 'Deambula com auxílio',
+            discharge: null
+          },
+          {
+            id: generateId(),
+            patientId: patient1Id,
+            date: '2023-06-16',
+            time: '09:00',
+            vitalSigns: {
+              temperature: 37.2,
+              heartRate: 88,
+              bloodPressure: '125/80',
+              respiratoryRate: 18,
+              oxygenSaturation: 95,
+              painLevel: 2
+            },
+            medications: [
+              {
+                name: 'Ceftriaxona',
+                dose: '1g',
+                route: 'Intravenosa'
+              }
+            ],
+            procedures: 'Raio-X de tórax',
+            observations: 'Melhora dos sintomas respiratórios.',
+            nutritionalStatus: 'Adequado',
+            mobilityStatus: 'Deambula sem auxílio',
+            discharge: null
+          },
+          {
+            id: generateId(),
+            patientId: patient2Id,
+            date: '2023-06-20',
+            time: '10:15',
+            vitalSigns: {
+              temperature: 36.8,
+              heartRate: 102,
+              bloodPressure: '160/95',
+              respiratoryRate: 22,
+              oxygenSaturation: 91,
+              painLevel: 4
+            },
+            medications: [
+              {
+                name: 'Furosemida',
+                dose: '40mg',
+                route: 'Intravenosa'
+              },
+              {
+                name: 'Enalapril',
+                dose: '10mg',
+                route: 'Oral'
+              }
+            ],
+            procedures: 'Aferição de peso e diurese',
+            observations: 'Paciente com dispneia aos pequenos esforços e edema +2/+4 em MMII.',
+            nutritionalStatus: 'Inapetente',
+            mobilityStatus: 'Restrito ao leito',
+            discharge: null
+          }
+        ];
+        
+        appData.records = sampleRecords;
+        
+        // Salvar dados no localStorage
+        saveDataToStorage();
+        
+        logDebug('Dados de exemplo adicionados: ' + appData.patients.length + ' pacientes e ' + appData.records.length + ' registros');
+      }
+    }
+    
+    // Resetar armazenamento local
+    function resetLocalStorage() {
+      localStorage.removeItem('patients');
+      localStorage.removeItem('records');
+      
+      appData.patients = [];
+      appData.records = [];
+      appData.selectedPatientId = null;
+      appData.editingPatientId = null;
+      appData.editingRecordId = null;
+      
+      logDebug('Armazenamento local resetado');
+      
+      // Adicionar dados de exemplo novamente
+      addSampleData();
+      
+      // Atualizar interface
+      renderPatientList();
+      
+      // Selecionar primeiro paciente
+      if (appData.patients.length > 0) {
+        selectPatient(appData.patients[0].id);
+      }
+      
+      showToast('Dados resetados com sucesso', 'warning');
+    }
+    
+    /**
+     * FUNÇÕES DE UTILIDADE
+     */
+    
+    // Registrar mensagem de debug
+    function logDebug(message, data) {
+      if (DEBUG_MODE) {
+        console.log(message, data ? data : '');
+        
+        // Adicionar ao painel de debug se existir
+        const debugPanel = document.getElementById('debugPanel');
+        if (debugPanel) {
+          const entry = document.createElement('div');
+          entry.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+          
+          if (data) {
+            const pre = document.createElement('pre');
+            pre.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+            entry.appendChild(pre);
+          }
+          
+          debugPanel.appendChild(entry);
+          
+          // Limitar entradas de debug
+          if (debugPanel.children.length > 30) {
+            debugPanel.removeChild(debugPanel.firstChild);
+          }
+          
+          // Rolar para o final
+          debugPanel.scrollTop = debugPanel.scrollHeight;
+        }
+        
+        // Atualizar painel com informações do paciente selecionado
+        if (appData.selectedPatientId) {
+          const patient = appData.patients.find(p => p.id === appData.selectedPatientId);
+          if (patient) {
+            document.getElementById('selectedPatientInfo').textContent = 
+              `Paciente: ${patient.name} (ID: ${patient.id.substring(0, 8)}...)`;
+          }
+        }
+      }
+    }
+    
+    // Formatar data
+    function formatDate(dateString) {
+      if (!dateString) return '--';
+      
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR');
+    }
+    
+    // Formatar data e hora
+    function formatDateTime(dateString, timeString) {
+      if (!dateString) return '--';
+      
+      const date = new Date(dateString);
+      const formattedDate = date.toLocaleDateString('pt-BR');
+      
+      if (timeString) {
+        return `${formattedDate} ${timeString}`;
+      }
+      
+      return formattedDate;
+    }
+    
+    // Calcular idade
+    function calculateAge(birthdate) {
+      const today = new Date();
+      const birthDate = new Date(birthdate);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      return age;
+    }
+    
+    // Calcular dias de internação
+    function calculateHospitalDays(admissionDate, dischargeDate = null) {
+      const start = new Date(admissionDate);
+      const end = dischargeDate ? new Date(dischargeDate) : new Date();
+      
+      const oneDay = 1000 * 60 * 60 * 24;
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.floor(diffTime / oneDay);
+      
+      return diffDays;
+    }
+    
+    // Limpar validação de formulário
+    function clearValidation(form) {
+      const invalidInputs = form.querySelectorAll('.invalid');
+      invalidInputs.forEach(input => {
+        input.classList.remove('invalid');
+      });
+    }
+    
+    /**
+     * FUNÇÕES DE VALIDAÇÃO
+     */
+    
+    // Validar formulário de paciente
+    function validatePatientForm() {
+      clearValidation(document.getElementById('patientForm'));
+      let isValid = true;
+      
+      // Validar campos obrigatórios
+      const requiredFields = [
+        { field: 'patientName', message: 'Nome é obrigatório' },
+        { field: 'patientBirthdate', message: 'Data de nascimento é obrigatória' },
+        { field: 'patientGender', message: 'Gênero é obrigatório' },
+        { field: 'patientRecord', message: 'Número de registro é obrigatório' },
+        { field: 'patientMedicalRecord', message: 'Número do prontuário é obrigatório' },
+        { field: 'patientAdmissionDate', message: 'Data de internação é obrigatória' },
+        { field: 'patientDiagnosis', message: 'Diagnóstico é obrigatório' }
+      ];
+      
+      requiredFields.forEach(({ field, message }) => {
+        const input = document.getElementById(field);
+        if (!input.value.trim()) {
+          input.classList.add('invalid');
+          const validationMsg = input.nextElementSibling;
+          if (validationMsg && validationMsg.classList.contains('validation-message')) {
+            validationMsg.textContent = message;
+            validationMsg.style.display = 'block';
+          }
+          isValid = false;
+        }
+      });
+      
+      return isValid;
+    }
+    
+    // Validar formulário de registro
+    function validateRecordForm() {
+      clearValidation(document.getElementById('recordForm'));
+      let isValid = true;
+      
+      // Validar campos obrigatórios
+      const requiredFields = [
+        { field: 'recordDate', message: 'Data é obrigatória' },
+        { field: 'recordTime', message: 'Hora é obrigatória' }
+      ];
+      
+      requiredFields.forEach(({ field, message }) => {
+        const input = document.getElementById(field);
+        if (!input.value.trim()) {
+          input.classList.add('invalid');
+          const validationMsg = input.nextElementSibling;
+          if (validationMsg && validationMsg.classList.contains('validation-message')) {
+            validationMsg.textContent = message;
+            validationMsg.style.display = 'block';
+          }
+          isValid = false;
+        }
+      });
+      
+      // Validar que pelo menos um sinal vital foi preenchido
+      const vitalSigns = [
+        document.getElementById('temperature'),
+        document.getElementById('heartRate'),
+        document.getElementById('bloodPressure'),
+        document.getElementById('respiratoryRate'),
+        document.getElementById('oxygenSaturation')
+      ];
+      
+      const hasVitalSign = vitalSigns.some(input => input && input.value.trim() !== '');
+      
+      if (!hasVitalSign) {
+        // Encontrar o elemento pai para adicionar a validação
+        const vitalSignsLabel = document.getElementById('vitalSigns');
+        if (vitalSignsLabel) {
+          vitalSignsLabel.parentElement.classList.add('invalid');
+          
+          // Encontrar a mensagem de validação
+          const validationMsg = vitalSignsLabel.parentElement.querySelector('.validation-message');
+          if (validationMsg) {
+            validationMsg.style.display = 'block';
+          }
+        }
+        isValid = false;
+      }
+      
+      // Validar campos de alta se checkbox estiver marcado
+      if (document.getElementById('dischargePatient').checked) {
+        const dischargeRequiredFields = [
+          { field: 'dischargeReason', message: 'Motivo da alta é obrigatório' },
+          { field: 'dischargeSummary', message: 'Resumo da alta é obrigatório' }
+        ];
+        
+        dischargeRequiredFields.forEach(({ field, message }) => {
+          const input = document.getElementById(field);
+          if (!input.value.trim()) {
+            input.classList.add('invalid');
+            const validationMsg = input.nextElementSibling;
+            if (validationMsg && validationMsg.classList.contains('validation-message')) {
+              validationMsg.textContent = message;
+              validationMsg.style.display = 'block';
+            }
+            isValid = false;
+          }
+        });
+      }
+      
+      return isValid;
+    }
+    
+    /**
+     * FUNÇÕES RELACIONADAS AOS PACIENTES
+     */
+    
+    // Preparar formulário para novo paciente
+    function prepareNewPatient() {
+      // Limpar formulário
+      document.getElementById('patientForm').reset();
+      
+      // Preencher a data de internação com a data atual
+      document.getElementById('patientAdmissionDate').value = new Date().toISOString().slice(0, 10);
+      
+      // Atualizar título do modal
+      document.getElementById('patientModalTitle').textContent = 'Novo Paciente';
+      
+      // Limpar ID de edição
+      appData.editingPatientId = null;
+      
+      logDebug('Formulário de novo paciente preparado');
+    }
+    
+    // Selecionar um paciente
+    function selectPatient(patientId) {
+      logDebug('Selecionando paciente: ' + patientId);
+      
+      // Salvar ID do paciente selecionado
+      appData.selectedPatientId = patientId;
+      
+      // Atualizar visualização da lista
+      const patientCards = document.querySelectorAll('.patient-card');
+      patientCards.forEach(card => {
+        if (card.dataset.id === patientId) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      });
+      
+      // Atualizar o indicador de paciente selecionado
+      updatePatientSelectedIndicator();
+      
+      // Habilitar botão de registro diário
+      const patient = appData.patients.find(p => p.id === patientId);
+      const newDailyRecordBtn = document.getElementById('newDailyRecordBtn');
+      
+      if (patient && patient.isActive) {
+        newDailyRecordBtn.classList.remove('opacity-50');
+        newDailyRecordBtn.disabled = false;
+      } else {
+        newDailyRecordBtn.classList.add('opacity-50');
+        newDailyRecordBtn.disabled = true;
+      }
+      
+      // Atualizar visibilidade do botão flutuante
+      updateFloatingButtonVisibility();
+      
+      // Renderizar detalhes do paciente nas várias abas
+      renderPatientDetails(patientId);
+      renderHistoryTimeline(patientId);
+      renderStats(patientId);
+      
+      // Esconder estados vazios
+      document.getElementById('emptyPatientDetails').classList.add('hidden');
+      document.getElementById('historyEmptyState').classList.add('hidden');
+      document.getElementById('statsEmptyState').classList.add('hidden');
+      
+      // Mostrar contêineres de dados
+      document.getElementById('historyContainer').classList.remove('hidden');
+      document.getElementById('statsContainer').classList.remove('hidden');
+      
+      // Navegar para a aba desejada
+      switchTab('patientDetails');
+      
+      showToast(`Paciente "${patient.name}" selecionado`, 'success');
+    }
+    
+    // Editar um paciente existente
+    function editPatient(patientId) {
+      logDebug('Editando paciente:', patientId);
+      
+      const patient = appData.patients.find(p => p.id === patientId);
+      if (!patient) {
+        showToast('Paciente não encontrado', 'error');
+        return;
+      }
+      
+      appData.editingPatientId = patientId;
+      
+      // Preencher formulário
+      document.getElementById('patientName').value = patient.name;
+      document.getElementById('patientBirthdate').value = patient.birthdate;
+      document.getElementById('patientGender').value = patient.gender;
+      document.getElementById('patientRecord').value = patient.record;
+      document.getElementById('patientMedicalRecord').value = patient.medicalRecord || '';
+      document.getElementById('patientContact').value = patient.contact || '';
+      document.getElementById('patientAdmissionDate').value = patient.admissionDate;
+      document.getElementById('patientDiagnosis').value = patient.diagnosis;
+      document.getElementById('patientAllergies').value = patient.allergies || '';
+      document.getElementById('patientNotes').value = patient.notes || '';
+      
+      // Limpar validação
+      clearValidation(document.getElementById('patientForm'));
+      
+      // Atualizar título do modal
+      document.getElementById('patientModalTitle').textContent = 'Editar Paciente';
+      
+      // Abrir modal
+      showModal('patientModal');
+    }
+    
+    // Salvar um paciente
+    function savePatient(event) {
+      event.preventDefault();
+      logDebug('Salvando paciente...');
+      
+      if (!validatePatientForm()) {
+        showToast('Por favor, preencha todos os campos obrigatórios.', 'error');
+        return;
+      }
+      
+      const patient = {
+        id: appData.editingPatientId || generateId(),
+        name: document.getElementById('patientName').value,
+        birthdate: document.getElementById('patientBirthdate').value,
+        gender: document.getElementById('patientGender').value,
+        record: document.getElementById('patientRecord').value,
+        medicalRecord: document.getElementById('patientMedicalRecord').value,
+        contact: document.getElementById('patientContact').value,
+        admissionDate: document.getElementById('patientAdmissionDate').value,
+        diagnosis: document.getElementById('patientDiagnosis').value,
+        allergies: document.getElementById('patientAllergies').value,
+        notes: document.getElementById('patientNotes').value,
+        dischargeDate: null,
+        isActive: true
+      };
+      
+      if (appData.editingPatientId) {
+        // Atualizar paciente existente
+        const index = appData.patients.findIndex(p => p.id === appData.editingPatientId);
+        if (index !== -1) {
+          // Preservar dados de alta se existirem
+          if (appData.patients[index].dischargeDate) {
+            patient.dischargeDate = appData.patients[index].dischargeDate;
+            patient.isActive = appData.patients[index].isActive;
+          }
+          
+          appData.patients[index] = patient;
+          showToast('Paciente atualizado com sucesso.', 'success');
+          logDebug('Paciente atualizado:', patient);
+        }
+      } else {
+        // Adicionar novo paciente
+        appData.patients.push(patient);
+        showToast('Paciente cadastrado com sucesso.', 'success');
+        logDebug('Novo paciente adicionado:', patient);
+      }
+      
+      // Salvar dados
+      saveDataToStorage();
+      
+      // Fechar modal
+      hideModal('patientModal');
+      
+      // Atualizar lista de pacientes
+      renderPatientList();
+      
+      // Selecionar o paciente
+      selectPatient(patient.id);
+    }
+    
+    // Excluir um paciente
+    function deletePatient(patientId) {
+      logDebug('Excluindo paciente:', patientId);
+      
+      const patient = appData.patients.find(p => p.id === patientId);
+      if (!patient) {
+        showToast('Paciente não encontrado', 'error');
+        return;
+      }
+      
+      const patientRecords = appData.records.filter(r => r.patientId === patientId);
+      
+      document.getElementById('confirmMessage').textContent = `Tem certeza que deseja excluir o paciente ${patient.name} e todos os seus ${patientRecords.length} registros?`;
+      
+      const confirmYesBtn = document.getElementById('confirmYesBtn');
+      confirmYesBtn.onclick = function() {
+        // Remover registros do paciente
+        appData.records = appData.records.filter(r => r.patientId !== patientId);
+        
+        // Remover paciente
+        appData.patients = appData.patients.filter(p => p.id !== patientId);
+        
+        // Salvar dados
+        saveDataToStorage();
+        
+        // Fechar modal
+        hideModal('confirmModal');
+        
+        // Limpar seleção
+        appData.selectedPatientId = null;
+        
+        // Esconder detalhes e estatísticas
+        document.getElementById('emptyPatientDetails').classList.remove('hidden');
+        document.getElementById('historyContainer').classList.add('hidden');
+        document.getElementById('historyEmptyState').classList.remove('hidden');
+        document.getElementById('statsContainer').classList.add('hidden');
+        document.getElementById('statsEmptyState').classList.remove('hidden');
+        document.getElementById('patientActions').classList.add('hidden');
+        
+        // Esconder indicador de paciente selecionado
+        document.getElementById('patientSelectedIndicator').style.display = 'none';
+        
+        // Atualizar visibilidade do botão flutuante
+        updateFloatingButtonVisibility();
+        
+        // Atualizar lista de pacientes
+        renderPatientList();
+        
+        // Trocar para a aba de lista de pacientes
+        manualTabSwitch('patientList');
+        
+        showToast('Paciente excluído com sucesso.', 'success');
+        logDebug('Paciente excluído:', patientId);
+      };
+      
+      // Abrir modal de confirmação
+      showModal('confirmModal');
+    }
+    
+    // Iniciar alta de paciente
+    function dischargePatient(patientId) {
+      logDebug('Iniciando alta de paciente:', patientId);
+      
+      const patient = appData.patients.find(p => p.id === patientId);
+      if (!patient || !patient.isActive) {
+        showToast('Paciente não disponível para alta', 'error');
+        return;
+      }
+      
+      // Criar formulário de alta
+      document.getElementById('dailyRecordForm').classList.remove('hidden');
+      document.getElementById('dailyRecordEmptyState').classList.add('hidden');
+      document.getElementById('newRecordButtonContainer').style.display = 'none';
+      
+      // Preencher data e hora atual
+      const now = new Date();
+      document.getElementById('recordDate').value = now.toISOString().slice(0, 10);
+      document.getElementById('recordTime').value = now.toTimeString().slice(0, 5);
+      
+      // Atualizar nome do paciente no formulário
+      document.getElementById('currentPatientName').textContent = patient.name;
+      
+      // Ativar checkbox de alta
+      document.getElementById('dischargePatient').checked = true;
+      document.getElementById('dischargeSection').classList.remove('hidden');
+      
+      // Trocar para a aba de registro diário
+      manualTabSwitch('dailyRecord');
+      
+      showToast('Preencha os dados da alta do paciente.', 'info');
+    }
+    
+    /**
+     * FUNÇÕES RELACIONADAS AOS REGISTROS
+     */
+    
+    // NOVA FUNÇÃO: Criar novo registro diário - função principal para todos os caminhos
+    function createNewDailyRecord() {
+      logDebug('Criando novo registro diário para paciente: ' + appData.selectedPatientId);
+      
+      if (!appData.selectedPatientId) {
+        showToast('Selecione um paciente primeiro', 'warning');
+        manualTabSwitch('patientList');
+        return;
+      }
+      
+      const patient = appData.patients.find(p => p.id === appData.selectedPatientId);
+      if (!patient || !patient.isActive) {
+        showToast('Este paciente já teve alta. Não é possível adicionar registros.', 'warning');
+        return;
+      }
+      
+      // Preparar o formulário de novo registro
+      prepareNewRecord();
+      
+      // Trocar para a aba de registro diário
+      manualTabSwitch('dailyRecord');
+      
+      // Mostrar formulário e esconder outros elementos
+      document.getElementById('dailyRecordForm').classList.remove('hidden');
+      document.getElementById('dailyRecordEmptyState').classList.add('hidden');
+      document.getElementById('newRecordButtonContainer').style.display = 'none';
+    }
+    
+    // Função para preparar o formulário de novo registro
+    function prepareNewRecord() {
+      appData.editingRecordId = null;
+      
+      // Limpar formulário
+      document.getElementById('recordForm').reset();
+      
+      // Atualizar nome do paciente no formulário
+      const patient = appData.patients.find(p => p.id === appData.selectedPatientId);
+      if (patient) {
+        document.getElementById('currentPatientName').textContent = patient.name;
+      }
+      
+      // Preencher data e hora atual
+      const now = new Date();
+      document.getElementById('recordDate').value = now.toISOString().slice(0, 10);
+      document.getElementById('recordTime').value = now.toTimeString().slice(0, 5);
+      
+      // Esconder seção de alta
+      document.getElementById('dischargePatient').checked = false;
+      document.getElementById('dischargeSection').classList.add('hidden');
+      
+      // Limpar lista de medicamentos
+      const medicationsList = document.getElementById('medicationsList');
+      medicationsList.innerHTML = `
+        <div class="medication-entry">
+          <div class="flex-container">
+            <div>
+              <div class="form-group">
+                <label for="medicationName" class="form-label">Nome</label>
+                <input type="text" id="medicationName" class="form-control medication-name">
+              </div>
+            </div>
+            <div>
+              <div class="form-group">
+                <label for="medicationDose" class="form-label">Dose</label>
+                <input type="text" id="medicationDose" class="form-control medication-dose">
+              </div>
+            </div>
+          </div>
+          <div class="flex-container">
+            <div>
+              <div class="form-group">
+                <label for="medicationStartDate" class="form-label">Data de Início</label>
+                <input type="date" id="medicationStartDate" class="form-control medication-start-date">
+              </div>
+            </div>
+            <div>
+              <div class="form-group">
+                <label for="medicationRoute" class="form-label">Via de Administração</label>
+                <select id="medicationRoute" class="form-control medication-route">
+                  <option value="">Selecione</option>
+                  <option value="Oral">Oral</option>
+                  <option value="Intravenosa">Intravenosa</option>
+                  <option value="Intramuscular">Intramuscular</option>
+                  <option value="Subcutânea">Subcutânea</option>
+                  <option value="Inalatória">Inalatória</option>
+                  <option value="Tópica">Tópica</option>
+                  <option value="Outras">Outras</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Limpar validação
+      clearValidation(document.getElementById('recordForm'));
+      
+      logDebug('Formulário de novo registro preparado');
+    }
+    
+    // Salvar registro diário
+    function saveRecord(event) {
+      event.preventDefault();
+      logDebug('Salvando registro diário...');
+      
+      if (!validateRecordForm()) {
+        showToast('Por favor, preencha todos os campos obrigatórios.', 'error');
+        return;
+      }
+      
+      // Coletar dados dos medicamentos
+      const medicationEntries = document.querySelectorAll('.medication-entry');
+      const medications = [];
+      
+      medicationEntries.forEach(entry => {
+        const name = entry.querySelector('.medication-name').value.trim();
+        const dose = entry.querySelector('.medication-dose').value.trim();
+        const startDate = entry.querySelector('.medication-start-date')?.value || '';
+        const route = entry.querySelector('.medication-route').value;
+        
+        if (name && dose) {
+          medications.push({
+            name,
+            dose,
+            startDate,
+            route: route || 'Não especificada'
+          });
+        }
+      });
+      
+      // Coletar dados de sedação
+      const sedationEntries = document.querySelectorAll('.sedation-entry');
+      const sedations = [];
+      
+      if (document.getElementById('isUnderSedation').checked) {
+        sedationEntries.forEach(entry => {
+          const type = entry.querySelector('.sedation-type').value;
+          const dose = entry.querySelector('.sedation-dose').value.trim();
+          
+          if (type && dose) {
+            sedations.push({
+              type,
+              dose
+            });
+          }
+        });
+      }
+      
+      // Coletar dados de analgesia
+      const analgesiaEntries = document.querySelectorAll('.analgesia-entry');
+      const analgesics = [];
+      
+      if (document.getElementById('isUnderAnalgesia').checked) {
+        analgesiaEntries.forEach(entry => {
+          const type = entry.querySelector('.analgesia-type').value;
+          const daily = entry.querySelector('.analgesia-daily').value.trim();
+          
+          if (type && daily) {
+            analgesics.push({
+              type,
+              daily
+            });
+          }
+        });
+      }
+      
+      // Coletar dados de drogas vasoativas
+      const vasopressorEntries = document.querySelectorAll('.vasopressor-entry');
+      const vasopressors = [];
+      
+      if (document.getElementById('isUnderVasopressors').checked) {
+        vasopressorEntries.forEach(entry => {
+          const type = entry.querySelector('.vasopressor-type').value;
+          const dose = entry.querySelector('.vasopressor-dose').value.trim();
+          
+          if (type && dose) {
+            vasopressors.push({
+              type,
+              dose
+            });
+          }
+        });
+      }
+      
+      const record = {
+        id: appData.editingRecordId || generateId(),
+        patientId: appData.selectedPatientId,
+        date: document.getElementById('recordDate').value,
+        time: document.getElementById('recordTime').value,
+        vitalSigns: {
+          temperature: document.getElementById('temperature').value || null,
+          heartRate: document.getElementById('heartRate').value || null,
+          bloodPressure: document.getElementById('bloodPressure').value || null,
+          respiratoryRate: document.getElementById('respiratoryRate').value || null,
+          oxygenSaturation: document.getElementById('oxygenSaturation').value || null,
+          painLevel: document.getElementById('painLevel').value || null
+        },
+        medications: medications,
+        procedures: document.getElementById('procedures').value,
+        observations: document.getElementById('observations').value,
+        nutritionalStatus: document.getElementById('nutritionalStatus').value,
+        mobilityStatus: document.getElementById('mobilityStatus').value,
+        intubation: document.getElementById('isIntubated').checked ? {
+          canBeExtubated: document.querySelector('input[name="canBeExtubated"]:checked')?.value || null,
+          notes: document.getElementById('intubationNotes').value || ''
+        } : null,
+        sedation: document.getElementById('isUnderSedation').checked ? {
+          sedations: sedations
+        } : null,
+        analgesia: document.getElementById('isUnderAnalgesia').checked ? {
+          analgesics: analgesics
+        } : null,
+        vasopressors: document.getElementById('isUnderVasopressors').checked ? {
+          drugs: vasopressors
+        } : null,
+        discharge: null
+      };
+      
+      // Se for alta, adicionar informações de alta
+      if (document.getElementById('dischargePatient').checked) {
+        record.discharge = {
+          reason: document.getElementById('dischargeReason').value,
+          summary: document.getElementById('dischargeSummary').value,
+          followUp: document.getElementById('followUpInstructions').value
+        };
+        
+        // Atualizar paciente com data de alta
+        const patient = appData.patients.find(p => p.id === appData.selectedPatientId);
+        if (patient) {
+          patient.dischargeDate = record.date;
+          patient.isActive = false;
+          logDebug('Paciente recebeu alta:', patient);
+          
+          // Atualizar botão flutuante
+          updateFloatingButtonVisibility();
+        }
+      }
+      
+      if (appData.editingRecordId) {
+        // Atualizar registro existente
+        const index = appData.records.findIndex(r => r.id === appData.editingRecordId);
+        if (index !== -1) {
+          appData.records[index] = record;
+          showToast('Registro atualizado com sucesso.', 'success');
+          logDebug('Registro atualizado:', record);
+        }
+      } else {
+        // Adicionar novo registro
+        appData.records.push(record);
+        showToast('Registro adicionado com sucesso.', 'success');
+        logDebug('Novo registro adicionado:', record);
+      }
+      
+      // Salvar dados
+      saveDataToStorage();
+      
+      // Limpar formulário
+      document.getElementById('dailyRecordForm').classList.add('hidden');
+      document.getElementById('dailyRecordEmptyState').classList.add('hidden');
+      document.getElementById('newRecordButtonContainer').style.display = 'block';
+      
+      // Atualizar detalhes do paciente
+      renderPatientDetails(appData.selectedPatientId);
+      
+      // Atualizar histórico
+      renderHistoryTimeline(appData.selectedPatientId); 
+      
+      // Atualizar estatísticas
+      renderStats(appData.selectedPatientId);
+      
+      // Trocar para a aba de histórico
+      manualTabSwitch('patientHistory');
+    }
+    
+    // Visualizar um registro
+    function viewRecord(recordId) {
+      logDebug('Visualizando registro:', recordId);
+      
+      const record = appData.records.find(r => r.id === recordId);
+      if (!record) {
+        showToast('Registro não encontrado', 'error');
+        return;
+      }
+      
+      const patient = appData.patients.find(p => p.id === record.patientId);
+      const patientName = patient ? patient.name : 'Paciente desconhecido';
+      
+      const medications = record.medications.map(med => 
+        `<li>${med.name} ${med.dose} (${med.route})</li>`
+      ).join('');
+      
+      const vitals = [];
+      if (record.vitalSigns.temperature) vitals.push(`<li>Temperatura: ${record.vitalSigns.temperature}°C</li>`);
+      if (record.vitalSigns.heartRate) vitals.push(`<li>Freq. Cardíaca: ${record.vitalSigns.heartRate} bpm</li>`);
+      if (record.vitalSigns.bloodPressure) vitals.push(`<li>Pressão Arterial: ${record.vitalSigns.bloodPressure} mmHg</li>`);
+      if (record.vitalSigns.respiratoryRate) vitals.push(`<li>Freq. Respiratória: ${record.vitalSigns.respiratoryRate} irpm</li>`);
+      if (record.vitalSigns.oxygenSaturation) vitals.push(`<li>Saturação O₂: ${record.vitalSigns.oxygenSaturation}%</li>`);
+      if (record.vitalSigns.painLevel) vitals.push(`<li>Nível de Dor: ${record.vitalSigns.painLevel}/10</li>`);
+      
+      const hasDischarge = record.discharge !== null;
+      const hasIntubation = record.intubation !== null;
+      
+      // Verificar se há sedação
+      const hasSedation = record.sedation !== null && record.sedation?.sedations && record.sedation.sedations.length > 0;
+      
+      // Verificar se há analgesia
+      const hasAnalgesia = record.analgesia !== null && record.analgesia?.analgesics && record.analgesia.analgesics.length > 0;
+      
+      // Verificar se há drogas vasoativas
+      const hasVasopressors = record.vasopressors !== null && record.vasopressors?.drugs && record.vasopressors.drugs.length > 0;
+      
+      // Criar conteúdo HTML para medicamentos de sedação
+      let sedationHtml = '';
+      if (hasSedation) {
+        const sedations = record.sedation.sedations.map(sed => 
+          `<li>${sed.type} - ${sed.dose}</li>`
+        ).join('');
+        
+        sedationHtml = `
+          <div class="divider"></div>
+          <div class="record-sedation">
+            <h4>Sedação</h4>
+            <ul>${sedations}</ul>
+          </div>
+        `;
+      }
+      
+      // Criar conteúdo HTML para analgésicos
+      let analgesiaHtml = '';
+      if (hasAnalgesia) {
+        const analgesics = record.analgesia.analgesics.map(analg => 
+          `<li>${analg.type} - ${analg.daily}</li>`
+        ).join('');
+        
+        analgesiaHtml = `
+          <div class="divider"></div>
+          <div class="record-analgesia">
+            <h4>Analgesia</h4>
+            <ul>${analgesics}</ul>
+          </div>
+        `;
+      }
+      
+      // Criar conteúdo HTML para drogas vasoativas
+      let vasopressorsHtml = '';
+      if (hasVasopressors) {
+        const vasopressors = record.vasopressors.drugs.map(drug => 
+          `<li>${drug.type} - ${drug.dose}</li>`
+        ).join('');
+        
+        vasopressorsHtml = `
+          <div class="divider"></div>
+          <div class="record-vasopressors">
+            <h4>Drogas Vasoativas (DVA)</h4>
+            <ul>${vasopressors}</ul>
+          </div>
+        `;
+      }
+      
+      const recordDetails = document.getElementById('recordDetails');
+      recordDetails.innerHTML = `
+        <div class="record-patient-info">
+          <h3>${patientName}</h3>
+          <p>Data/Hora: ${formatDateTime(record.date, record.time)}</p>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="record-vital-signs">
+          <h4>Sinais Vitais</h4>
+          ${vitals.length > 0 ? `<ul>${vitals.join('')}</ul>` : '<p>Nenhum sinal vital registrado</p>'}
+        </div>
+        
+        <div class="record-medications">
+          <h4>Medicamentos</h4>
+          ${medications.length > 0 ? `<ul>${medications}</ul>` : '<p>Nenhum medicamento registrado</p>'}
+        </div>
+        
+        ${record.procedures ? `
+          <div class="record-procedures">
+            <h4>Procedimentos</h4>
+            <p>${record.procedures}</p>
+          </div>
+        ` : ''}
+        
+        ${record.observations ? `
+          <div class="record-observations">
+            <h4>Observações</h4>
+            <p>${record.observations}</p>
+          </div>
+        ` : ''}
+        
+        ${record.nutritionalStatus ? `
+          <div class="record-nutrition">
+            <h4>Estado Nutricional</h4>
+            <p>${record.nutritionalStatus}</p>
+          </div>
+        ` : ''}
+        
+        ${record.mobilityStatus ? `
+          <div class="record-mobility">
+            <h4>Mobilidade</h4>
+            <p>${record.mobilityStatus}</p>
+          </div>
+        ` : ''}
+        
+        ${hasIntubation ? `
+          <div class="divider"></div>
+          
+          <div class="record-intubation">
+            <h4>Informações de Intubação</h4>
+            <p><strong>Pode ser extubado?</strong> ${record.intubation.canBeExtubated === 'S' ? 'Sim' : record.intubation.canBeExtubated === 'N' ? 'Não' : 'Não informado'}</p>
+            ${record.intubation.notes ? `<p><strong>Observações sobre intubação:</strong> ${record.intubation.notes}</p>` : ''}
+          </div>
+        ` : ''}
+        
+        ${hasSedation ? sedationHtml : ''}
+        
+        ${hasDischarge ? `
+          <div class="divider"></div>
+          
+          <div class="record-discharge">
+            <h4>Informações de Alta</h4>
+            <p><strong>Motivo da Alta:</strong> ${record.discharge.reason}</p>
+            <p><strong>Resumo da Alta:</strong> ${record.discharge.summary}</p>
+            ${record.discharge.followUp ? `<p><strong>Instruções de Acompanhamento:</strong> ${record.discharge.followUp}</p>` : ''}
+          </div>
+        ` : ''}
+      `;
+      
+      showModal('viewRecordModal');
+    }
+    
+    // Adicionar medicamento ao formulário
+    function addMedication() {
+      logDebug('Adicionando campo de medicamento');
+      
+      const medicationsList = document.getElementById('medicationsList');
+      const newEntry = document.createElement('div');
+      newEntry.className = 'medication-entry';
+      newEntry.innerHTML = `
+        <div class="flex-container">
+          <div>
+            <div class="form-group">
+              <label for="medicationName" class="form-label">Nome</label>
+              <input type="text" class="form-control medication-name">
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label for="medicationDose" class="form-label">Dose</label>
+              <input type="text" class="form-control medication-dose">
+            </div>
+          </div>
+        </div>
+        <div class="flex-container">
+          <div>
+            <div class="form-group">
+              <label for="medicationStartDate" class="form-label">Data de Início</label>
+              <input type="date" class="form-control medication-start-date">
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label for="medicationRoute" class="form-label">Via de Administração</label>
+              <select class="form-control medication-route">
+                <option value="">Selecione</option>
+                <option value="Oral">Oral</option>
+                <option value="Intravenosa">Intravenosa</option>
+                <option value="Intramuscular">Intramuscular</option>
+                <option value="Subcutânea">Subcutânea</option>
+                <option value="Inalatória">Inalatória</option>
+                <option value="Tópica">Tópica</option>
+                <option value="Outras">Outras</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger remove-medication mt-2">
+          <i class="fas fa-trash-alt"></i> Remover
+        </button>
+      `;
+      
+      medicationsList.appendChild(newEntry);
+      
+      // Adicionar evento ao botão de remover
+      const removeButton = newEntry.querySelector('.remove-medication');
+      removeButton.addEventListener('click', function() {
+        medicationsList.removeChild(newEntry);
+      });
+    }
+    
+    /**
+     * FUNÇÕES DE RENDERIZAÇÃO
+     */
+    
+    // Renderizar lista de pacientes
+    function renderPatientList() {
+      const patientListContainer = document.getElementById('patientListContainer');
+      const emptyPatientList = document.getElementById('emptyPatientList');
+      
+      logDebug('Renderizando lista de pacientes:', appData.patients.length);
+      
+      if (appData.patients.length === 0) {
+        patientListContainer.innerHTML = '';
+        emptyPatientList.classList.remove('hidden');
+        return;
+      }
+      
+      emptyPatientList.classList.add('hidden');
+      
+      let filteredPatients = [...appData.patients];
+      
+      // Aplicar filtros
+      const statusFilter = document.getElementById('statusFilter').value;
+      const searchTerm = document.getElementById('searchPatients').value.trim().toLowerCase();
+      
+      if (statusFilter !== 'all') {
+        const isActive = statusFilter === 'active';
+        filteredPatients = filteredPatients.filter(patient => patient.isActive === isActive);
+      }
+      
+      if (searchTerm !== '') {
+        filteredPatients = filteredPatients.filter(patient => 
+          patient.name.toLowerCase().includes(searchTerm) || 
+          patient.record.toLowerCase().includes(searchTerm) ||
+          patient.diagnosis.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      // Aplicar ordenação
+      const sortPatients = document.getElementById('sortPatients').value;
+      switch (sortPatients) {
+        case 'nameAsc':
+          filteredPatients.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'nameDesc':
+          filteredPatients.sort((a, b) => b.name.localeCompare(a.name));
+          break;
+        case 'dateAsc':
+          filteredPatients.sort((a, b) => new Date(a.admissionDate) - new Date(b.admissionDate));
+          break;
+        case 'dateDesc':
+          filteredPatients.sort((a, b) => new Date(b.admissionDate) - new Date(a.admissionDate));
+          break;
+      }
+      
+      let html = '';
+      
+      filteredPatients.forEach(patient => {
+        const isSelected = patient.id === appData.selectedPatientId;
+        const statusBadge = patient.isActive
+          ? '<span class="badge badge-primary">Internado</span>'
+          : '<span class="badge badge-success">Alta</span>';
+        
+        // Adicionando opção de criar novo registro diretamente no cartão do paciente
+        const actionButtons = patient.isActive 
+          ? `
+            <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); selectPatient('${patient.id}')">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); selectPatient('${patient.id}'); createNewDailyRecord()">
+              <i class="fas fa-plus"></i>
+            </button>
+          `
+          : `
+            <button class="btn btn-sm btn-info" onclick="event.stopPropagation(); selectPatient('${patient.id}')">
+              <i class="fas fa-eye"></i>
+            </button>
+          `;
+        
+        html += `
+          <div class="patient-card ${isSelected ? 'selected' : ''}" data-id="${patient.id}" onclick="selectPatient('${patient.id}')">
+            <div class="patient-info">
+              <div class="patient-name">${patient.name} ${statusBadge}</div>
+              <div class="patient-record">Registro: ${patient.record} | Internação: ${formatDate(patient.admissionDate)}</div>
+            </div>
+            <div class="patient-actions">
+              ${actionButtons}
+            </div>
+          </div>
+        `;
+      });
+      
+      patientListContainer.innerHTML = html;
+      logDebug(`Lista renderizada com ${filteredPatients.length} pacientes`);
+    }
+    
+    // Renderizar detalhes do paciente
+    function renderPatientDetails(patientId) {
+      const selectedPatientDetails = document.getElementById('selectedPatientDetails');
+      const patientActions = document.getElementById('patientActions');
+      
+      logDebug('Renderizando detalhes do paciente:', patientId);
+      
+      const patient = appData.patients.find(p => p.id === patientId);
+      
+      if (!patient) {
+        selectedPatientDetails.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-user"></i>
+            <div class="empty-state-text">Selecione um paciente para visualizar os detalhes</div>
+          </div>
+        `;
+        patientActions.classList.add('hidden');
+        return;
+      }
+      
+      const age = calculateAge(patient.birthdate);
+      const hospitalDays = calculateHospitalDays(patient.admissionDate, patient.dischargeDate);
+      
+      const statusBadge = patient.isActive
+        ? '<span class="badge badge-primary">Internado</span>'
+        : `<span class="badge badge-success">Alta em ${formatDate(patient.dischargeDate)}</span>`;
+      
+      // Adicionar botão de novo registro mais visível
+      const newRecordButton = patient.isActive 
+        ? `
+          <div class="big-action-button" onclick="createNewDailyRecord()" style="margin: 1rem auto;">
+            <i class="fas fa-plus-circle"></i>
+            <div class="big-action-button-text">Criar Novo Registro</div>
+          </div>
+        ` 
+        : '';
+      
+      let html = `
+        <div class="card">
+          <h2>${patient.name} ${statusBadge}</h2>
+          <div class="patient-basic-info">
+            <p><strong>Registro:</strong> ${patient.record}</p>
+            <p><strong>Prontuário:</strong> ${patient.medicalRecord}</p>
+            <p><strong>Idade:</strong> ${age} anos (${formatDate(patient.birthdate)})</p>
+            <p><strong>Gênero:</strong> ${patient.gender}</p>
+            <p><strong>Contato:</strong> ${patient.contact || 'Não informado'}</p>
+          </div>
+          
+          <div class="divider"></div>
+          
+          <div class="patient-clinical-info">
+            <p><strong>Data de Internação:</strong> ${formatDate(patient.admissionDate)}</p>
+            <p><strong>Tempo de Internação:</strong> ${hospitalDays} dias</p>
+            <p><strong>Diagnóstico:</strong> ${patient.diagnosis}</p>
+            <p><strong>Alergias:</strong> ${patient.allergies || 'Nenhuma alergia conhecida'}</p>
+          </div>
+          
+          <div class="divider"></div>
+          
+          <div class="patient-notes">
+            <h3>Observações</h3>
+            <p>${patient.notes || 'Sem observações adicionais'}</p>
+          </div>
+          
+          ${newRecordButton}
+        </div>
+      `;
+      
+      selectedPatientDetails.innerHTML = html;
+      patientActions.classList.remove('hidden');
+      
+      // Desabilitar botão de alta se o paciente já teve alta
+      const dischargePatientBtn = document.getElementById('dischargePatientBtn');
+      if (!patient.isActive) {
+        dischargePatientBtn.disabled = true;
+        dischargePatientBtn.classList.add('opacity-50');
+      } else {
+        dischargePatientBtn.disabled = false;
+        dischargePatientBtn.classList.remove('opacity-50');
+      }
+      
+      logDebug('Detalhes do paciente renderizados');
+    }
+    
+    // Renderizar histórico do paciente
+    function renderHistoryTimeline(patientId) {
+      const historyTimelineEl = document.getElementById('historyTimeline');
+      const historyTableEl = document.getElementById('historyTable');
+      const historyTableBodyEl = document.getElementById('historyTableBody');
+      const historyContainer = document.getElementById('historyContainer');
+      const historyEmptyState = document.getElementById('historyEmptyState');
+      
+      logDebug('Renderizando histórico do paciente:', patientId);
+      
+      const patient = appData.patients.find(p => p.id === patientId);
+      if (!patient) {
+        historyEmptyState.classList.remove('hidden');
+        historyContainer.classList.add('hidden');
+        return;
+      }
+      
+      historyEmptyState.classList.add('hidden');
+      historyContainer.classList.remove('hidden');
+      
+      const patientRecords = appData.records.filter(r => r.patientId === patientId);
+      
+      if (patientRecords.length === 0) {
+        historyTimelineEl.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <div class="empty-state-text">Nenhum registro disponível para este paciente</div>
+            ${patient.isActive ? `
+              <button class="btn btn-primary highlight-btn" onclick="createNewDailyRecord()">
+                <i class="fas fa-plus"></i> Criar Primeiro Registro
+              </button>
+            ` : ''}
+          </div>
+        `;
+        historyTableBodyEl.innerHTML = '';
+        return;
+      }
+      
+      // Ordenar registros por data e hora
+      patientRecords.sort((a, b) => {
+        const dateA = new Date(`${a.date}T${a.time}`);
+        const dateB = new Date(`${b.date}T${b.time}`);
+        return dateB - dateA; // Do mais recente para o mais antigo
+      });
+      
+      // Filtrar por data se os campos estiverem preenchidos
+      const startDate = document.getElementById('historyDateStart').value;
+      const endDate = document.getElementById('historyDateEnd').value;
+      
+      let filteredRecords = [...patientRecords];
+      
+      if (startDate) {
+        filteredRecords = filteredRecords.filter(r => r.date >= startDate);
+      }
+      
+      if (endDate) {
+        filteredRecords = filteredRecords.filter(r => r.date <= endDate);
+      }
+      
+      // Timeline
+      let timelineHtml = '';
+      
+      filteredRecords.forEach(record => {
+        const hasDischarge = record.discharge !== null;
+        const dischargeBadge = hasDischarge ? '<span class="badge badge-success">Alta</span>' : '';
+        
+        const medications = record.medications.map(med => 
+          `${med.name} ${med.dose} (${med.route})`
+        ).join(', ');
+        
+        const vitals = [];
+        if (record.vitalSigns.temperature) vitals.push(`Temp: ${record.vitalSigns.temperature}°C`);
+        if (record.vitalSigns.heartRate) vitals.push(`FC: ${record.vitalSigns.heartRate} bpm`);
+        if (record.vitalSigns.bloodPressure) vitals.push(`PA: ${record.vitalSigns.bloodPressure} mmHg`);
+        if (record.vitalSigns.respiratoryRate) vitals.push(`FR: ${record.vitalSigns.respiratoryRate} irpm`);
+        if (record.vitalSigns.oxygenSaturation) vitals.push(`SatO₂: ${record.vitalSigns.oxygenSaturation}%`);
+        if (record.vitalSigns.painLevel) vitals.push(`Dor: ${record.vitalSigns.painLevel}/10`);
+        
+        timelineHtml += `
+          <div class="history-item">
+            <div class="history-date">
+              ${formatDateTime(record.date, record.time)} ${dischargeBadge}
+            </div>
+            <div class="history-content">
+              <p><strong>Sinais Vitais:</strong> ${vitals.join(' | ') || 'Não registrados'}</p>
+              <p><strong>Medicamentos:</strong> ${medications || 'Nenhum medicamento registrado'}</p>
+              ${record.procedures ? `<p><strong>Procedimentos:</strong> ${record.procedures}</p>` : ''}
+              ${record.observations ? `<p><strong>Observações:</strong> ${record.observations}</p>` : ''}
+              ${record.nutritionalStatus ? `<p><strong>Estado Nutricional:</strong> ${record.nutritionalStatus}</p>` : ''}
+              ${record.mobilityStatus ? `<p><strong>Mobilidade:</strong> ${record.mobilityStatus}</p>` : ''}
+              
+              ${hasDischarge ? `
+                <div class="divider"></div>
+                <div class="discharge-info">
+                  <p><strong>Motivo da Alta:</strong> ${record.discharge.reason}</p>
+                  <p><strong>Resumo da Alta:</strong> ${record.discharge.summary}</p>
+                  ${record.discharge.followUp ? `<p><strong>Instruções de Acompanhamento:</strong> ${record.discharge.followUp}</p>` : ''}
+                </div>
+              ` : ''}
+              
+              <div class="text-right mt-2">
+                <button class="btn btn-sm btn-info" onclick="viewRecord('${record.id}')">
+                  <i class="fas fa-eye"></i> Detalhes
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      historyTimelineEl.innerHTML = timelineHtml;
+      
+      // Tabela
+      let tableHtml = '';
+      
+      filteredRecords.forEach(record => {
+        const hasDischarge = record.discharge !== null;
+        const dischargeBadge = hasDischarge ? '<span class="badge badge-success">Alta</span>' : '';
+        
+        const medications = record.medications.map(med => 
+          `${med.name} ${med.dose}`
+        ).join(', ');
+        
+        const vitals = [];
+        if (record.vitalSigns.temperature) vitals.push(`${record.vitalSigns.temperature}°C`);
+        if (record.vitalSigns.heartRate) vitals.push(`FC: ${record.vitalSigns.heartRate}`);
+        if (record.vitalSigns.oxygenSaturation) vitals.push(`SatO₂: ${record.vitalSigns.oxygenSaturation}%`);
+        
+        tableHtml += `
+          <tr>
+            <td>${formatDateTime(record.date, record.time)} ${dischargeBadge}</td>
+            <td>${vitals.join(' | ') || '-'}</td>
+            <td>${medications || '-'}</td>
+            <td>${record.observations || '-'}</td>
+            <td>
+              <button class="btn btn-sm btn-info" onclick="viewRecord('${record.id}')">
+                <i class="fas fa-eye"></i> Ver
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+      
+      historyTableBodyEl.innerHTML = tableHtml;
+      
+      // Mostrar visualização selecionada
+      const historyView = document.getElementById('historyView').value;
+      if (historyView === 'timeline') {
+        historyTimelineEl.classList.remove('hidden');
+        historyTableEl.classList.add('hidden');
+      } else {
+        historyTimelineEl.classList.add('hidden');
+        historyTableEl.classList.remove('hidden');
+      }
+      
+      logDebug(`Histórico renderizado com ${filteredRecords.length} registros`);
+    }
+    
+    // Renderizar estatísticas do paciente
+    function renderStats(patientId) {
+      const statsContainer = document.getElementById('statsContainer');
+      const statsEmptyState = document.getElementById('statsEmptyState');
+      
+      logDebug('Renderizando estatísticas do paciente:', patientId);
+      
+      const patient = appData.patients.find(p => p.id === patientId);
+      if (!patient) {
+        statsEmptyState.classList.remove('hidden');
+        statsContainer.classList.add('hidden');
+        return;
+      }
+      
+      statsEmptyState.classList.add('hidden');
+      statsContainer.classList.remove('hidden');
+      
+      const patientRecords = appData.records.filter(r => r.patientId === patientId);
+      
+      // Informações básicas
+      document.getElementById('statAdmissionDate').textContent = formatDate(patient.admissionDate);
+      document.getElementById('statDiagnosis').textContent = patient.diagnosis;
+      document.getElementById('statHospitalDays').textContent = `${calculateHospitalDays(patient.admissionDate, patient.dischargeDate)} dias`;
+      
+      document.getElementById('statCurrentStatus').textContent = patient.isActive ? 'Internado' : 'Alta hospitalar';
+      
+      // Última atualização
+      if (patientRecords.length > 0) {
+        // Ordenar por data/hora decrescente
+        patientRecords.sort((a, b) => {
+          const dateA = new Date(`${a.date}T${a.time}`);
+          const dateB = new Date(`${b.date}T${b.time}`);
+          return dateB - dateA;
+        });
+        
+        document.getElementById('statLastUpdate').textContent = formatDateTime(patientRecords[0].date, patientRecords[0].time);
+      } else {
+        document.getElementById('statLastUpdate').textContent = 'Nenhum registro';
+      }
+      
+      // Renderizar gráfico
+      renderVitalSignsChart(patientRecords);
+      
+      // Tabela de medicamentos utilizados
+      const medicationStatsTable = document.getElementById('medicationStatsTable');
+      
+      // Calcular estatísticas de medicamentos
+      const medications = {};
+      
+      patientRecords.forEach(record => {
+        if (record.medications && record.medications.length > 0) {
+          record.medications.forEach(med => {
+            const key = `${med.name}-${med.dose}-${med.route}`;
+            if (!medications[key]) {
+              medications[key] = {
+                name: med.name,
+                dose: med.dose,
+                route: med.route,
+                count: 0
+              };
+            }
+            medications[key].count++;
+          });
+        }
+      });
+      
+      // Ordenar medicamentos pelo número de vezes administrados
+      const medicationList = Object.values(medications).sort((a, b) => b.count - a.count);
+      
+      let medicationHtml = '';
+      
+      medicationList.forEach(med => {
+        medicationHtml += `
+          <tr>
+            <td>${med.name}</td>
+            <td>${med.dose}</td>
+            <td>${med.route}</td>
+            <td>${med.count} vezes</td>
+          </tr>
+        `;
+      });
+      
+      if (medicationList.length === 0) {
+        medicationHtml = `
+          <tr>
+            <td colspan="4" class="text-center">Nenhum medicamento registrado</td>
+          </tr>
+        `;
+      }
+      
+      medicationStatsTable.innerHTML = medicationHtml;
+      
+      logDebug('Estatísticas renderizadas');
+    }
+    
+    // Renderizar gráfico de sinais vitais
+    function renderVitalSignsChart(patientRecords) {
+      const canvas = document.getElementById('vitalSignsChart');
+      const vitalSignSelect = document.getElementById('vitalSignSelect');
+      const selectedVital = vitalSignSelect.value;
+      
+      // Limpar o canvas
+      if (window.vitalSignsChart) {
+        window.vitalSignsChart.destroy();
+      }
+      
+      if (patientRecords.length === 0) {
+        return;
+      }
+      
+      // Ordenar registros por data e hora
+      patientRecords.sort((a, b) => {
+        const dateA = new Date(`${a.date}T${a.time}`);
+        const dateB = new Date(`${b.date}T${b.time}`);
+        return dateA - dateB;
+      });
+      
+      // Configurar dados para o gráfico
+      const labels = patientRecords.map(record => formatDateTime(record.date, record.time));
+      
+      let chartLabel = '';
+      let chartData = [];
+      let borderColor = '';
+      let yAxisConfig = {};
+      
+      switch (selectedVital) {
+        case 'temperature':
+          chartLabel = 'Temperatura (°C)';
+          chartData = patientRecords.map(record => record.vitalSigns?.temperature || null);
+          borderColor = '#ff6384';
+          yAxisConfig = {
+            min: 35,
+            max: 40,
+            ticks: {
+              stepSize: 0.5
+            }
+          };
+          break;
+        case 'heartRate':
+          chartLabel = 'Frequência Cardíaca (bpm)';
+          chartData = patientRecords.map(record => record.vitalSigns?.heartRate || null);
+          borderColor = '#36a2eb';
+          yAxisConfig = {
+            min: 40,
+            max: 180,
+            ticks: {
+              stepSize: 20
+            }
+          };
+          break;
+        case 'oxygenSaturation':
+          chartLabel = 'Saturação de O₂ (%)';
+          chartData = patientRecords.map(record => record.vitalSigns?.oxygenSaturation || null);
+          borderColor = '#4bc0c0';
+          yAxisConfig = {
+            min: 70,
+            max: 100,
+            ticks: {
+              stepSize: 5
+            }
+          };
+          break;
+        case 'painLevel':
+          chartLabel = 'Nível de Dor (0-10)';
+          chartData = patientRecords.map(record => record.vitalSigns?.painLevel || null);
+          borderColor = '#ff9f40';
+          yAxisConfig = {
+            min: 0,
+            max: 10,
+            ticks: {
+              stepSize: 1
+            }
+          };
+          break;
+      }
+      
+      // Criar o gráfico
+      window.vitalSignsChart = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: chartLabel,
+            data: chartData,
+            borderColor: borderColor,
+            backgroundColor: borderColor + '33',
+            fill: true,
+            tension: 0.1,
+            pointBackgroundColor: borderColor,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+            }
+          },
+          scales: {
+            y: yAxisConfig,
+            x: {
+              ticks: {
+                maxRotation: 45,
+                minRotation: 45
+              }
+            }
+          }
+        }
+      });
+      
+      logDebug('Gráfico de sinais vitais renderizado');
+    }
+    
+    /**
+     * CONFIGURAÇÃO DE EVENTOS
+     */
+    
     // Configurar ouvintes de eventos
     function setupEventListeners() {
       // Formulário de paciente
@@ -1826,31 +3911,12 @@
         const intubationSection = document.getElementById('intubationSection');
         intubationSection.classList.toggle('hidden', !this.checked);
         
-        // Se o checkbox for marcado, atualizar o cálculo de tempo
+        // Se o elemento ficar visível, garantir que a seção de parâmetros de ventilação também esteja visível
         if (this.checked) {
-          updateIntubationDuration();
+          console.log("Checkbox de intubação marcado - mostrando seção de intubação");
+        } else {
+          console.log("Checkbox de intubação desmarcado - escondendo seção de intubação");
         }
-      });
-      
-      // Evento de mudança de data de início da intubação
-      document.getElementById('intubationStartDate').addEventListener('change', function() {
-        updateIntubationDuration();
-      });
-      
-      // Evento de checkbox de acesso central
-      document.getElementById('hasCentralAccess').addEventListener('change', function() {
-        const centralAccessSection = document.getElementById('centralAccessSection');
-        centralAccessSection.classList.toggle('hidden', !this.checked);
-        
-        // Se o checkbox for marcado, atualizar o cálculo de tempo
-        if (this.checked) {
-          updateCatheterDuration();
-        }
-      });
-      
-      // Evento de mudança de data de inserção do cateter central
-      document.getElementById('centralAccessInsertionDate').addEventListener('change', function() {
-        updateCatheterDuration();
       });
       
       // Evento de checkbox de sedação
@@ -1885,6 +3951,139 @@
       document.getElementById('addVasopressorBtn').addEventListener('click', function() {
         addVasopressor();
       });
+      
+    // Função para adicionar nova entrada de sedação
+    function addSedation() {
+      logDebug('Adicionando campo de sedação');
+      
+      const sedationsList = document.getElementById('sedationsList');
+      const newEntry = document.createElement('div');
+      newEntry.className = 'sedation-entry';
+      newEntry.innerHTML = `
+        <div class="flex-container">
+          <div>
+            <div class="form-group">
+              <label for="sedationType" class="form-label">Tipo de Sedação</label>
+              <select class="form-control sedation-type">
+                <option value="">Selecione</option>
+                <option value="Midazolam">Midazolam</option>
+                <option value="Propofol">Propofol</option>
+                <option value="Ketamina">Ketamina</option>
+                <option value="Dexmedetomidina">Dexmedetomidina</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label for="sedationDose" class="form-label">Dose</label>
+              <input type="text" class="form-control sedation-dose" placeholder="Ex: 5mg/h, 50mcg/kg/min">
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger remove-sedation mt-2">
+          <i class="fas fa-trash-alt"></i> Remover
+        </button>
+      `;
+      
+      sedationsList.appendChild(newEntry);
+      
+      // Adicionar evento ao botão de remover
+      const removeButton = newEntry.querySelector('.remove-sedation');
+      removeButton.addEventListener('click', function() {
+        sedationsList.removeChild(newEntry);
+      });
+    }
+    
+    // Função para adicionar nova entrada de vasopressor (drogas vasoativas)
+    function addVasopressor() {
+      logDebug('Adicionando campo de droga vasoativa');
+      
+      const vasopressorList = document.getElementById('vasopressorList');
+      const newEntry = document.createElement('div');
+      newEntry.className = 'vasopressor-entry';
+      newEntry.innerHTML = `
+        <div class="flex-container">
+          <div>
+            <div class="form-group">
+              <label for="vasopressorType" class="form-label">Tipo de Droga Vasoativa</label>
+              <select class="form-control vasopressor-type">
+                <option value="">Selecione</option>
+                <option value="Norepinefrina">Norepinefrina</option>
+                <option value="Adrenalina">Adrenalina</option>
+                <option value="Vasopressina">Vasopressina</option>
+                <option value="Dobutamina">Dobutamina</option>
+                <option value="Dopamina">Dopamina</option>
+                <option value="Outra">Outra</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label for="vasopressorDose" class="form-label">Dose (ml/h)</label>
+              <input type="text" class="form-control vasopressor-dose" placeholder="Ex: 5ml/h, 10ml/h">
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger remove-vasopressor mt-2">
+          <i class="fas fa-trash-alt"></i> Remover
+        </button>
+      `;
+      
+      vasopressorList.appendChild(newEntry);
+      
+      // Adicionar evento ao botão de remover
+      const removeButton = newEntry.querySelector('.remove-vasopressor');
+      removeButton.addEventListener('click', function() {
+        vasopressorList.removeChild(newEntry);
+      });
+    }
+    
+    // Função para adicionar nova entrada de analgesia
+    function addAnalgesia() {
+      logDebug('Adicionando campo de analgesia');
+      
+      const analgesiaList = document.getElementById('analgesiaList');
+      const newEntry = document.createElement('div');
+      newEntry.className = 'analgesia-entry';
+      newEntry.innerHTML = `
+        <div class="flex-container">
+          <div>
+            <div class="form-group">
+              <label for="analgesiaType" class="form-label">Tipo de Analgésico</label>
+              <select class="form-control analgesia-type">
+                <option value="">Selecione</option>
+                <option value="Fentanil">Fentanil</option>
+                <option value="Morfina">Morfina</option>
+                <option value="Codeína">Codeína</option>
+                <option value="Tramadol">Tramadol</option>
+                <option value="Dipirona">Dipirona</option>
+                <option value="Paracetamol">Paracetamol</option>
+                <option value="AINH">AINH</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label for="analgesiaDaily" class="form-label">Dose Diária</label>
+              <input type="text" class="form-control analgesia-daily" placeholder="Ex: 50mg 6/6h, 1g 4x/dia">
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger remove-analgesia mt-2">
+          <i class="fas fa-trash-alt"></i> Remover
+        </button>
+      `;
+      
+      analgesiaList.appendChild(newEntry);
+      
+      // Adicionar evento ao botão de remover
+      const removeButton = newEntry.querySelector('.remove-analgesia');
+      removeButton.addEventListener('click', function() {
+        analgesiaList.removeChild(newEntry);
+      });
+    }
       
       // Evento de cancelamento de registro
       document.getElementById('cancelRecordBtn').addEventListener('click', function() {
@@ -1933,327 +4132,59 @@
       // Adicionar medicamento
       document.getElementById('addMedicationBtn').addEventListener('click', addMedication);
       
-      // Outros eventos...
-    }
-    
-    // Função para calcular e atualizar o tempo de intubação
-    function updateIntubationDuration() {
-      const startDateInput = document.getElementById('intubationStartDate');
-      const durationElement = document.getElementById('intubationDuration');
-      
-      if (startDateInput.value) {
-        const startDate = new Date(startDateInput.value);
-        const today = new Date();
-        
-        // Calcular a diferença em dias
-        const differenceInTime = today.getTime() - startDate.getTime();
-        const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
-        
-        durationElement.textContent = `${differenceInDays} dias`;
-        
-        // Adicionar alerta visual baseado no tempo de intubação
-        durationElement.classList.remove('text-success', 'text-warning', 'text-danger');
-        
-        if (differenceInDays < 7) {
-          durationElement.classList.add('text-success');
-        } else if (differenceInDays < 14) {
-          durationElement.classList.add('text-warning');
-        } else {
-          durationElement.classList.add('text-danger');
-        }
-      } else {
-        durationElement.textContent = 'Informe a data de início';
-        durationElement.classList.remove('text-success', 'text-warning', 'text-danger');
-      }
-    }
-    
-    // Função para calcular e atualizar o tempo de uso do cateter central
-    function updateCatheterDuration() {
-      const insertionDateInput = document.getElementById('centralAccessInsertionDate');
-      const durationElement = document.getElementById('centralAccessDuration');
-      
-      if (insertionDateInput.value) {
-        const insertionDate = new Date(insertionDateInput.value);
-        const today = new Date();
-        
-        // Calcular a diferença em dias
-        const differenceInTime = today.getTime() - insertionDate.getTime();
-        const differenceInDays = Math.floor(differenceInTime / (1000 * 3600 * 24));
-        
-        durationElement.textContent = `${differenceInDays} dias`;
-        
-        // Adicionar alerta visual baseado no tempo de uso
-        durationElement.classList.remove('text-success', 'text-warning', 'text-danger');
-        
-        if (differenceInDays < 7) {
-          durationElement.classList.add('text-success');
-        } else if (differenceInDays < 14) {
-          durationElement.classList.add('text-warning');
-        } else {
-          durationElement.classList.add('text-danger');
-        }
-      } else {
-        durationElement.textContent = 'Informe a data de inserção';
-        durationElement.classList.remove('text-success', 'text-warning', 'text-danger');
-      }
-    }
-    
-    // Salvar registro diário
-    function saveRecord(event) {
-      event.preventDefault();
-      logDebug('Salvando registro diário...');
-      
-      if (!validateRecordForm()) {
-        showToast('Por favor, preencha todos os campos obrigatórios.', 'error');
-        return;
-      }
-      
-      // Coletar dados dos medicamentos
-      const medicationEntries = document.querySelectorAll('.medication-entry');
-      const medications = [];
-      
-      medicationEntries.forEach(entry => {
-        const name = entry.querySelector('.medication-name').value.trim();
-        const dose = entry.querySelector('.medication-dose').value.trim();
-        const startDate = entry.querySelector('.medication-start-date')?.value || '';
-        const route = entry.querySelector('.medication-route').value;
-        
-        if (name && dose) {
-          medications.push({
-            name,
-            dose,
-            startDate,
-            route: route || 'Não especificada'
-          });
-        }
+      // Botões de ações do paciente
+      document.getElementById('editPatientBtn').addEventListener('click', function() {
+        editPatient(appData.selectedPatientId);
       });
       
-      // Coletar dados de sedação, analgesia e drogas vasoativas (código não mostrado para brevidade)
+      document.getElementById('deletePatientBtn').addEventListener('click', function() {
+        deletePatient(appData.selectedPatientId);
+      });
       
-      // Dados de acesso central
-      const centralAccess = document.getElementById('hasCentralAccess').checked ? {
-        location: document.getElementById('centralAccessLocation').value,
-        insertionDate: document.getElementById('centralAccessInsertionDate').value,
-        notes: document.getElementById('centralAccessNotes').value || ''
-      } : null;
+      document.getElementById('dischargePatientBtn').addEventListener('click', function() {
+        dischargePatient(appData.selectedPatientId);
+      });
       
-      const record = {
-        id: appData.editingRecordId || generateId(),
-        patientId: appData.selectedPatientId,
-        date: document.getElementById('recordDate').value,
-        time: document.getElementById('recordTime').value,
-        vitalSigns: {
-          temperature: document.getElementById('temperature').value || null,
-          heartRate: document.getElementById('heartRate').value || null,
-          bloodPressure: document.getElementById('bloodPressure').value || null,
-          respiratoryRate: document.getElementById('respiratoryRate').value || null,
-          oxygenSaturation: document.getElementById('oxygenSaturation').value || null,
-          painLevel: document.getElementById('painLevel').value || null
-        },
-        medications: medications,
-        procedures: document.getElementById('procedures').value,
-        observations: document.getElementById('observations').value,
-        nutritionalStatus: document.getElementById('nutritionalStatus').value,
-        mobilityStatus: document.getElementById('mobilityStatus').value,
-        intubation: document.getElementById('isIntubated').checked ? {
-          startDate: document.getElementById('intubationStartDate').value,
-          canBeExtubated: document.querySelector('input[name="canBeExtubated"]:checked')?.value || null,
-          notes: document.getElementById('intubationNotes').value || '',
-          ventilationParams: {
-            mode: document.getElementById('ventilationMode').value || null,
-            fio2: document.getElementById('fio2').value || null,
-            vc: document.getElementById('vc').value || null,
-            vt: document.getElementById('vt').value || null,
-            respiratoryFrequency: document.getElementById('ventilatoryFrequency').value || null,
-            peep: document.getElementById('peep').value || null,
-            inspiratoryPressure: document.getElementById('inspiratoryPressure').value || null,
-            peakPressure: document.getElementById('peakPressure').value || null,
-            plateauPressure: document.getElementById('plateauPressure').value || null
-          }
-        } : null,
-        centralAccess: centralAccess,
-        // Outras propriedades como sedação, analgesia, etc.
-        discharge: null
-      };
+      // Eventos de filtros e busca
+      document.getElementById('searchPatients').addEventListener('input', renderPatientList);
+      document.getElementById('statusFilter').addEventListener('change', renderPatientList);
+      document.getElementById('sortPatients').addEventListener('change', renderPatientList);
       
-      // Se for alta, adicionar informações de alta
-      if (document.getElementById('dischargePatient').checked) {
-        record.discharge = {
-          reason: document.getElementById('dischargeReason').value,
-          summary: document.getElementById('dischargeSummary').value,
-          followUp: document.getElementById('followUpInstructions').value
-        };
-        
-        // Atualizar paciente com data de alta
-        const patient = appData.patients.find(p => p.id === appData.selectedPatientId);
-        if (patient) {
-          patient.dischargeDate = record.date;
-          patient.isActive = false;
-          logDebug('Paciente recebeu alta:', patient);
-        }
+      // Eventos do histórico
+      document.getElementById('historyDateStart').addEventListener('change', function() {
+        renderHistoryTimeline(appData.selectedPatientId);
+      });
+      
+      document.getElementById('historyDateEnd').addEventListener('change', function() {
+        renderHistoryTimeline(appData.selectedPatientId);
+      });
+      
+      document.getElementById('historyView').addEventListener('change', function() {
+        renderHistoryTimeline(appData.selectedPatientId);
+      });
+      
+      // Eventos de estatísticas
+      document.getElementById('vitalSignSelect').addEventListener('change', function() {
+        renderVitalSignsChart(appData.records.filter(r => r.patientId === appData.selectedPatientId));
+      });
+      
+      // Adicionar botão de reset se estiver em modo debug
+      if (DEBUG_MODE) {
+        const resetBtn = document.createElement('button');
+        resetBtn.className = 'btn btn-sm btn-danger mt-2';
+        resetBtn.textContent = 'Resetar Dados';
+        resetBtn.addEventListener('click', resetLocalStorage);
+        document.getElementById('debugContainer').appendChild(resetBtn);
       }
-      
-      // Adicionar ou atualizar o registro
-      if (appData.editingRecordId) {
-        const index = appData.records.findIndex(r => r.id === appData.editingRecordId);
-        if (index !== -1) {
-          appData.records[index] = record;
-          showToast('Registro atualizado com sucesso.', 'success');
-        }
-      } else {
-        appData.records.push(record);
-        showToast('Registro adicionado com sucesso.', 'success');
-      }
-      
-      // Salvar dados
-      saveDataToStorage();
-      
-      // Limpar formulário
-      document.getElementById('dailyRecordForm').classList.add('hidden');
-      document.getElementById('newRecordButtonContainer').style.display = 'block';
-      
-      // Atualizar detalhes e histórico
-      renderPatientDetails(appData.selectedPatientId);
-      renderHistoryTimeline(appData.selectedPatientId);
-      renderStats(appData.selectedPatientId);
-      
-      // Trocar para a aba de histórico
-      manualTabSwitch('patientHistory');
     }
     
-    // Função de visualização de registro
-    function viewRecord(recordId) {
-      logDebug('Visualizando registro:', recordId);
-      
-      const record = appData.records.find(r => r.id === recordId);
-      if (!record) {
-        showToast('Registro não encontrado', 'error');
-        return;
-      }
-      
-      const patient = appData.patients.find(p => p.id === record.patientId);
-      const patientName = patient ? patient.name : 'Paciente desconhecido';
-      
-      // Verificar presença de informações específicas
-      const hasIntubation = record.intubation !== null;
-      const hasCentralAccess = record.centralAccess !== null;
-      
-      // Criar HTML para intubação
-      let intubationHtml = '';
-      if (hasIntubation) {
-        let intubationTimeInfo = '';
-        if (record.intubation.startDate) {
-          const startDate = formatDate(record.intubation.startDate);
-          const recordDate = new Date(record.date);
-          const intubStartDate = new Date(record.intubation.startDate);
-          const daysIntubated = Math.floor((recordDate - intubStartDate) / (1000 * 60 * 60 * 24));
-          
-          intubationTimeInfo = `
-            <p><strong>Data de Início:</strong> ${startDate}</p>
-            <p><strong>Tempo de Intubação:</strong> ${daysIntubated} dias</p>
-          `;
-        }
-        
-        // Criar HTML para parâmetros de ventilação
-        let ventilationParamsHtml = '';
-        if (record.intubation.ventilationParams) {
-          const params = record.intubation.ventilationParams;
-          let paramsList = '';
-          
-          if (params.mode) paramsList += `<li><strong>Modo:</strong> ${params.mode}</li>`;
-          if (params.fio2) paramsList += `<li><strong>FiO2:</strong> ${params.fio2}%</li>`;
-          if (params.vc) paramsList += `<li><strong>VC:</strong> ${params.vc} ml</li>`;
-          if (params.vt) paramsList += `<li><strong>VT:</strong> ${params.vt} L/min</li>`;
-          if (params.respiratoryFrequency) paramsList += `<li><strong>FR:</strong> ${params.respiratoryFrequency} irpm</li>`;
-          if (params.peep) paramsList += `<li><strong>PEEP:</strong> ${params.peep} cmH₂O</li>`;
-          if (params.inspiratoryPressure) paramsList += `<li><strong>Pressão Inspiratória:</strong> ${params.inspiratoryPressure} cmH₂O</li>`;
-          if (params.peakPressure) paramsList += `<li><strong>Pressão de Pico:</strong> ${params.peakPressure} cmH₂O</li>`;
-          if (params.plateauPressure) paramsList += `<li><strong>Pressão de Platô:</strong> ${params.plateauPressure} cmH₂O</li>`;
-          
-          if (paramsList) {
-            ventilationParamsHtml = `
-              <div class="card" style="padding: 0.75rem; margin: 0.5rem 0; background-color: rgba(93, 92, 222, 0.05);">
-                <h5>Parâmetros de Ventilação Mecânica</h5>
-                <ul>${paramsList}</ul>
-              </div>
-            `;
-          }
-        }
-        
-        intubationHtml = `
-          <div class="divider"></div>
-          <div class="record-intubation">
-            <h4>Informações de Intubação</h4>
-            ${intubationTimeInfo}
-            <p><strong>Pode ser extubado?</strong> ${record.intubation.canBeExtubated === 'S' ? 'Sim' : record.intubation.canBeExtubated === 'N' ? 'Não' : 'Não informado'}</p>
-            ${ventilationParamsHtml}
-            ${record.intubation.notes ? `<p><strong>Observações sobre intubação:</strong> ${record.intubation.notes}</p>` : ''}
-          </div>
-        `;
-      }
-      
-      // Criar HTML para acesso central
-      let centralAccessHtml = '';
-      if (hasCentralAccess) {
-        const location = record.centralAccess.location;
-        const insertionDate = formatDate(record.centralAccess.insertionDate);
-        const notes = record.centralAccess.notes || '';
-        
-        // Calcular o tempo de uso até a data do registro
-        let daysOfUseHtml = '';
-        if (record.centralAccess.insertionDate) {
-          const recordDate = new Date(record.date);
-          const insertDate = new Date(record.centralAccess.insertionDate);
-          const daysOfUse = Math.floor((recordDate - insertDate) / (1000 * 60 * 60 * 24));
-          
-          let daysClass = '';
-          if (daysOfUse < 7) daysClass = 'text-success';
-          else if (daysOfUse < 14) daysClass = 'text-warning';
-          else daysClass = 'text-danger';
-          
-          daysOfUseHtml = `<p><strong>Tempo de Uso:</strong> <span class="${daysClass}">${daysOfUse} dias</span></p>`;
-        }
-        
-        centralAccessHtml = `
-          <div class="divider"></div>
-          <div class="record-central-access">
-            <h4>Acesso Central</h4>
-            <p><strong>Localização:</strong> ${location}</p>
-            <p><strong>Data de Inserção:</strong> ${insertionDate}</p>
-            ${daysOfUseHtml}
-            ${notes ? `<p><strong>Observações:</strong> ${notes}</p>` : ''}
-          </div>
-        `;
-      }
-      
-      // Montar o HTML completo do registro
-      const recordDetails = document.getElementById('recordDetails');
-      recordDetails.innerHTML = `
-        <div class="record-patient-info">
-          <h3>${patientName}</h3>
-          <p>Data/Hora: ${formatDateTime(record.date, record.time)}</p>
-        </div>
-        
-        <div class="divider"></div>
-        
-        <div class="record-vital-signs">
-          <h4>Sinais Vitais</h4>
-          <!-- Detalhes dos sinais vitais -->
-        </div>
-        
-        <!-- Outras seções como medicamentos, procedimentos, etc. -->
-        
-        ${intubationHtml}
-        
-        ${centralAccessHtml}
-        
-        <!-- Outras seções como sedação, alta, etc. -->
-      `;
-      
-      showModal('viewRecordModal');
-    }
-    
-    // Resto do código JavaScript...
+    // Expor funções necessárias globalmente
+    window.selectPatient = selectPatient;
+    window.manualTabSwitch = manualTabSwitch;
+    window.viewRecord = viewRecord;
+    window.showModal = showModal;
+    window.hideModal = hideModal;
+    window.createNewDailyRecord = createNewDailyRecord;
   </script>
 </body>
 </html>
